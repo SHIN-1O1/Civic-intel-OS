@@ -26,13 +26,41 @@ import {
     MoreHorizontal
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { mockTeams, mockUsers } from "@/lib/mock-data";
 import { format } from "date-fns";
+import { api } from "@/services/api";
+import { Team, User } from "@/lib/types";
 
 export default function WorkforcePage() {
-    const onlineTeams = mockTeams.filter(t => t.status !== "offline").length;
-    const busyTeams = mockTeams.filter(t => t.status === "busy").length;
-    const totalMembers = mockTeams.reduce((acc, t) => acc + t.members.length, 0);
+    const [teams, setTeams] = React.useState<Team[]>([]);
+    const [users, setUsers] = React.useState<User[]>([]);
+    const [loading, setLoading] = React.useState(true);
+
+    React.useEffect(() => {
+        loadData();
+    }, []);
+
+    const loadData = async () => {
+        try {
+            const [teamsData, usersData] = await Promise.all([
+                api.getTeams(),
+                api.getUsers()
+            ]);
+            setTeams(teamsData);
+            setUsers(usersData);
+        } catch (error) {
+            console.error("Failed to load workforce data", error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const onlineTeams = teams.filter(t => t.status !== "offline").length;
+    const busyTeams = teams.filter(t => t.status === "busy").length;
+    const totalMembers = teams.reduce((acc, t) => acc + t.members.length, 0);
+
+    if (loading) {
+        return <div className="p-8 text-center">Loading workforce data...</div>;
+    }
 
     return (
         <div className="space-y-6">
@@ -59,7 +87,7 @@ export default function WorkforcePage() {
                                 <Truck className="h-6 w-6 text-primary" />
                             </div>
                             <div>
-                                <p className="text-2xl font-bold">{mockTeams.length}</p>
+                                <p className="text-2xl font-bold">{teams.length}</p>
                                 <p className="text-sm text-muted-foreground">Total Teams</p>
                             </div>
                         </div>
@@ -116,7 +144,7 @@ export default function WorkforcePage() {
 
                 <TabsContent value="teams" className="mt-4">
                     <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-                        {mockTeams.map((team) => (
+                        {teams.map((team) => (
                             <Card key={team.id} className={cn(
                                 team.status === "offline" && "opacity-60"
                             )}>
@@ -190,7 +218,7 @@ export default function WorkforcePage() {
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
-                                    {mockTeams.flatMap(team =>
+                                    {teams.flatMap(team =>
                                         team.members.map(member => (
                                             <TableRow key={member.id}>
                                                 <TableCell>

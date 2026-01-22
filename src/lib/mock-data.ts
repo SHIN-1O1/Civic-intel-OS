@@ -221,14 +221,22 @@ export const mockTeams: Team[] = [
         name: 'Road Team A',
         department: 'Roads & Infrastructure',
         status: 'busy',
-        currentTask: 'Fixing Pothole',
+        currentTask: 'Fixing Pothole on Main Street',
         currentTaskLocation: 'Main St & 5th Ave',
         shiftEnd: hoursFromNow(4),
-        capacity: { current: 2, max: 4 },
+        capacity: { current: 7, max: 10 },
         location: { lat: 12.9720, lng: 77.5950 },
         members: [
             { id: 'M001', name: 'Rajesh Kumar', role: 'Team Lead', phone: '+91 98765 43210' },
-            { id: 'M002', name: 'Suresh Patel', role: 'Operator', phone: '+91 98765 43211' }
+            { id: 'M002', name: 'Suresh Patel', role: 'Senior Operator', phone: '+91 98765 43211' },
+            { id: 'M003', name: 'Amit Singh', role: 'Heavy Equipment Operator', phone: '+91 98765 43212' },
+            { id: 'M004', name: 'Vijay Sharma', role: 'Equipment Operator', phone: '+91 98765 43213' },
+            { id: 'M005', name: 'Ravi Kumar', role: 'Technical Worker', phone: '+91 98765 43214' },
+            { id: 'M006', name: 'Sandeep Yadav', role: 'Technical Worker', phone: '+91 98765 43215' },
+            { id: 'M007', name: 'Manoj Gupta', role: 'Worker', phone: '+91 98765 43216' },
+            { id: 'M008', name: 'Rahul Verma', role: 'Worker', phone: '+91 98765 43217' },
+            { id: 'M009', name: 'Karan Joshi', role: 'Helper', phone: '+91 98765 43218' },
+            { id: 'M010', name: 'Arjun Mehta', role: 'Helper', phone: '+91 98765 43219' }
         ]
     },
     {
@@ -236,29 +244,43 @@ export const mockTeams: Team[] = [
         name: 'Sanitation Team B',
         department: 'Sanitation',
         status: 'busy',
-        currentTask: 'Garbage Collection',
+        currentTask: 'Garbage Collection at Market Area',
         currentTaskLocation: 'Market Road',
         shiftEnd: hoursFromNow(3),
-        capacity: { current: 3, max: 5 },
+        capacity: { current: 8, max: 10 },
         location: { lat: 12.9768, lng: 77.5995 },
         members: [
-            { id: 'M003', name: 'Venkat Rao', role: 'Team Lead', phone: '+91 98765 43212' },
-            { id: 'M004', name: 'Mohan Das', role: 'Worker', phone: '+91 98765 43213' },
-            { id: 'M005', name: 'Sita Devi', role: 'Worker', phone: '+91 98765 43214' }
+            { id: 'M011', name: 'Venkat Rao', role: 'Team Lead', phone: '+91 98765 43220' },
+            { id: 'M012', name: 'Mohan Das', role: 'Supervisor', phone: '+91 98765 43221' },
+            { id: 'M013', name: 'Sita Devi', role: 'Waste Collector', phone: '+91 98765 43222' },
+            { id: 'M014', name: 'Lakshmi Bai', role: 'Waste Collector', phone: '+91 98765 43223' },
+            { id: 'M015', name: 'Krishna Murthy', role: 'Waste Collector', phone: '+91 98765 43224' },
+            { id: 'M016', name: 'Ramesh Babu', role: 'Waste Collector', phone: '+91 98765 43225' },
+            { id: 'M017', name: 'Ganesh Prasad', role: 'Sanitation Worker', phone: '+91 98765 43226' },
+            { id: 'M018', name: 'Sunil Kumar', role: 'Sanitation Worker', phone: '+91 98765 43227' },
+            { id: 'M019', name: 'Prakash Reddy', role: 'Driver', phone: '+91 98765 43228' },
+            { id: 'M020', name: 'Dinesh Nair', role: 'Helper', phone: '+91 98765 43229' }
         ]
     },
     {
         id: 'TEAM-003',
         name: 'Electrical Team A',
         department: 'Electrical',
-        status: 'busy',
-        currentTask: 'Street Light Repair',
-        currentTaskLocation: 'Oak Avenue',
+        status: 'available',
         shiftEnd: hoursFromNow(5),
-        capacity: { current: 1, max: 3 },
+        capacity: { current: 0, max: 10 },
         location: { lat: 12.9652, lng: 77.5852 },
         members: [
-            { id: 'M006', name: 'Anil Sharma', role: 'Electrician Lead', phone: '+91 98765 43215' }
+            { id: 'M021', name: 'Anil Sharma', role: 'Team Lead - Electrician', phone: '+91 98765 43230' },
+            { id: 'M022', name: 'Deepak Jain', role: 'Senior Electrician', phone: '+91 98765 43231' },
+            { id: 'M023', name: 'Vikas Chauhan', role: 'Electrician', phone: '+91 98765 43232' },
+            { id: 'M024', name: 'Rohit Saxena', role: 'Electrician', phone: '+91 98765 43233' },
+            { id: 'M025', name: 'Manish Tiwari', role: 'Electrician', phone: '+91 98765 43234' },
+            { id: 'M026', name: 'Sanjay Mishra', role: 'Line Worker', phone: '+91 98765 43235' },
+            { id: 'M027', name: 'Ashok Pandey', role: 'Line Worker', phone: '+91 98765 43236' },
+            { id: 'M028', name: 'Mukesh Dubey', role: 'Technician', phone: '+91 98765 43237' },
+            { id: 'M029', name: 'Rajat Trivedi', role: 'Helper', phone: '+91 98765 43238' },
+            { id: 'M030', name: 'Naveen Pathak', role: 'Helper', phone: '+91 98765 43239' }
         ]
     },
     {
@@ -269,13 +291,19 @@ export const mockTeams: Team[] = [
         currentTask: 'Water Main Repair',
         currentTaskLocation: 'Industrial Estate',
         shiftEnd: hoursFromNow(6),
-        capacity: { current: 4, max: 4 },
+        capacity: { current: 9, max: 10 },
         location: { lat: 12.9802, lng: 77.6102 },
         members: [
-            { id: 'M007', name: 'Prakash Nair', role: 'Team Lead', phone: '+91 98765 43216' },
-            { id: 'M008', name: 'Ganesh Iyer', role: 'Plumber', phone: '+91 98765 43217' },
-            { id: 'M009', name: 'Ramesh Singh', role: 'Plumber', phone: '+91 98765 43218' },
-            { id: 'M010', name: 'Kiran Kumar', role: 'Helper', phone: '+91 98765 43219' }
+            { id: 'M031', name: 'Prakash Nair', role: 'Team Lead', phone: '+91 98765 43240' },
+            { id: 'M032', name: 'Ganesh Iyer', role: 'Senior Plumber', phone: '+91 98765 43241' },
+            { id: 'M033', name: 'Ramesh Singh', role: 'Plumber', phone: '+91 98765 43242' },
+            { id: 'M034', name: 'Kiran Kumar', role: 'Plumber', phone: '+91 98765 43243' },
+            { id: 'M035', name: 'Naresh Pillai', role: 'Plumber', phone: '+91 98765 43244' },
+            { id: 'M036', name: 'Satish Menon', role: 'Pipe Fitter', phone: '+91 98765 43245' },
+            { id: 'M037', name: 'Anand Bhat', role: 'Pipe Fitter', phone: '+91 98765 43246' },
+            { id: 'M038', name: 'Harish Shetty', role: 'Technician', phone: '+91 98765 43247' },
+            { id: 'M039', name: 'Suresh Pai', role: 'Helper', phone: '+91 98765 43248' },
+            { id: 'M040', name: 'Mahesh Kamath', role: 'Helper', phone: '+91 98765 43249' }
         ]
     },
     {
@@ -284,11 +312,19 @@ export const mockTeams: Team[] = [
         department: 'Parks & Gardens',
         status: 'available',
         shiftEnd: hoursFromNow(4),
-        capacity: { current: 0, max: 3 },
+        capacity: { current: 0, max: 10 },
         location: { lat: 12.9702, lng: 77.5902 },
         members: [
-            { id: 'M011', name: 'Lakshmi Bai', role: 'Team Lead', phone: '+91 98765 43220' },
-            { id: 'M012', name: 'Arjun Reddy', role: 'Gardener', phone: '+91 98765 43221' }
+            { id: 'M041', name: 'Lakshmi Bai', role: 'Team Lead - Horticulturist', phone: '+91 98765 43250' },
+            { id: 'M042', name: 'Arjun Reddy', role: 'Senior Gardener', phone: '+91 98765 43251' },
+            { id: 'M043', name: 'Priya Kumari', role: 'Gardener', phone: '+91 98765 43252' },
+            { id: 'M044', name: 'Sunita Patil', role: 'Gardener', phone: '+91 98765 43253' },
+            { id: 'M045', name: 'Kavita Desai', role: 'Gardener', phone: '+91 98765 43254' },
+            { id: 'M046', name: 'Anita Rao', role: 'Gardener', phone: '+91 98765 43255' },
+            { id: 'M047', name: 'Rajesh Naik', role: 'Landscaper', phone: '+91 98765 43256' },
+            { id: 'M048', name: 'Santosh Gowda', role: 'Landscaper', phone: '+91 98765 43257' },
+            { id: 'M049', name: 'Shashi Hegde', role: 'Helper', phone: '+91 98765 43258' },
+            { id: 'M050', name: 'Raju Poojary', role: 'Helper', phone: '+91 98765 43259' }
         ]
     },
     {
@@ -297,33 +333,63 @@ export const mockTeams: Team[] = [
         department: 'Roads & Infrastructure',
         status: 'available',
         shiftEnd: hoursFromNow(5),
-        capacity: { current: 0, max: 4 },
+        capacity: { current: 0, max: 10 },
         location: { lat: 12.9680, lng: 77.5920 },
         members: [
-            { id: 'M013', name: 'Deepak Verma', role: 'Team Lead', phone: '+91 98765 43222' },
-            { id: 'M014', name: 'Santosh Gupta', role: 'Operator', phone: '+91 98765 43223' }
+            { id: 'M051', name: 'Deepak Verma', role: 'Team Lead', phone: '+91 98765 43260' },
+            { id: 'M052', name: 'Santosh Gupta', role: 'Senior Operator', phone: '+91 98765 43261' },
+            { id: 'M053', name: 'Prakash Joshi', role: 'Equipment Operator', phone: '+91 98765 43262' },
+            { id: 'M054', name: 'Vinod Agarwal', role: 'Equipment Operator', phone: '+91 98765 43263' },
+            { id: 'M055', name: 'Ajay Thakur', role: 'Road Worker', phone: '+91 98765 43264' },
+            { id: 'M056', name: 'Nitin Bhatt', role: 'Road Worker', phone: '+91 98765 43265' },
+            { id: 'M057', name: 'Pawan Kulkarni', role: 'Road Worker', phone: '+91 98765 43266' },
+            { id: 'M058', name: 'Mohit Shukla', role: 'Technician', phone: '+91 98765 43267' },
+            { id: 'M059', name: 'Sachin Chopra', role: 'Helper', phone: '+91 98765 43268' },
+            { id: 'M060', name: 'Gaurav Malhotra', role: 'Helper', phone: '+91 98765 43269' }
         ]
     },
     {
         id: 'TEAM-007',
         name: 'Drainage Team A',
         department: 'Drainage',
-        status: 'offline',
-        shiftEnd: hoursAgo(2),
-        capacity: { current: 0, max: 4 },
+        status: 'busy',
+        currentTask: 'Drain Cleaning Operation',
+        currentTaskLocation: 'Lakeview Colony',
+        shiftEnd: hoursFromNow(7),
+        capacity: { current: 6, max: 10 },
+        location: { lat: 12.9632, lng: 77.5832 },
         members: [
-            { id: 'M015', name: 'Ravi Shankar', role: 'Team Lead', phone: '+91 98765 43224' }
+            { id: 'M061', name: 'Ramesh Sinha', role: 'Team Lead', phone: '+91 98765 43270' },
+            { id: 'M062', name: 'Mohan Prasad', role: 'Drainage Specialist', phone: '+91 98765 43271' },
+            { id: 'M063', name: 'Sudhir Jadhav', role: 'Drainage Worker', phone: '+91 98765 43272' },
+            { id: 'M064', name: 'Yogesh Bhosale', role: 'Drainage Worker', phone: '+91 98765 43273' },
+            { id: 'M065', name: 'Kailash Pawar', role: 'Drainage Worker', phone: '+91 98765 43274' },
+            { id: 'M066', name: 'Umesh Shinde', role: 'Pump Operator', phone: '+91 98765 43275' },
+            { id: 'M067', name: 'Dilip Wagh', role: 'Pump Operator', phone: '+91 98765 43276' },
+            { id: 'M068', name: 'Sachin Kale', role: 'Technician', phone: '+91 98765 43277' },
+            { id: 'M069', name: 'Ashish More', role: 'Helper', phone: '+91 98765 43278' },
+            { id: 'M070', name: 'Nikhil Patil', role: 'Helper', phone: '+91 98765 43279' }
         ]
     },
     {
         id: 'TEAM-008',
-        name: 'Electrical Team B',
-        department: 'Electrical',
-        status: 'offline',
-        shiftEnd: hoursAgo(1),
-        capacity: { current: 0, max: 3 },
+        name: 'Sanitation Team C',
+        department: 'Sanitation',
+        status: 'available',
+        shiftEnd: hoursFromNow(3),
+        capacity: { current: 0, max: 10 },
+        location: { lat: 12.9740, lng: 77.5980 },
         members: [
-            { id: 'M016', name: 'Vijay Kumar', role: 'Electrician Lead', phone: '+91 98765 43225' }
+            { id: 'M071', name: 'Balaji Reddy', role: 'Team Lead', phone: '+91 98765 43280' },
+            { id: 'M072', name: 'Murali Krishna', role: 'Supervisor', phone: '+91 98765 43281' },
+            { id: 'M073', name: 'Nagaraj Rao', role: 'Waste Collector', phone: '+91 98765 43282' },
+            { id: 'M074', name: 'Srinivas Goud', role: 'Waste Collector', phone: '+91 98765 43283' },
+            { id: 'M075', name: 'Gopal Choudhary', role: 'Waste Collector', phone: '+91 98765 43284' },
+            { id: 'M076', name: 'Ramana Kumar', role: 'Sanitation Worker', phone: '+91 98765 43285' },
+            { id: 'M077', name: 'Chandra Prasad', role: 'Sanitation Worker', phone: '+91 98765 43286' },
+            { id: 'M078', name: 'Bharath Simha', role: 'Sanitation Worker', phone: '+91 98765 43287' },
+            { id: 'M079', name: 'Venu Madhav', role: 'Driver', phone: '+91 98765 43288' },
+            { id: 'M080', name: 'Anil Yadav', role: 'Helper', phone: '+91 98765 43289' }
         ]
     }
 ];

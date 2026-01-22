@@ -1,3 +1,6 @@
+"use client";
+
+import * as React from "react";
 import { KPICard } from "@/components/dashboard/kpi-card";
 import { ActionStream } from "@/components/dashboard/action-stream";
 import { Heatmap } from "@/components/dashboard/heatmap";
@@ -7,14 +10,41 @@ import {
     Users,
     Timer
 } from "lucide-react";
-import {
-    mockKPIData,
-    getUrgentTickets,
-    mockSystemFeed
-} from "@/lib/mock-data";
+import { api } from "@/services/api";
+import { KPIData, Ticket, SystemFeedItem } from "@/lib/types";
 
 export default function DashboardPage() {
-    const urgentTickets = getUrgentTickets();
+    const [kpiData, setKpiData] = React.useState<KPIData | null>(null);
+    const [tickets, setTickets] = React.useState<Ticket[]>([]);
+    const [systemFeed, setSystemFeed] = React.useState<SystemFeedItem[]>([]);
+    const [loading, setLoading] = React.useState(true);
+
+    React.useEffect(() => {
+        loadDashboardData();
+    }, []);
+
+    const loadDashboardData = async () => {
+        try {
+            const [kpi, tix, feed] = await Promise.all([
+                api.getKPIData(),
+                api.getTickets(),
+                api.getSystemFeed()
+            ]);
+            setKpiData(kpi);
+            setTickets(tix);
+            setSystemFeed(feed);
+        } catch (error) {
+            console.error("Failed to load dashboard data", error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const urgentTickets = tickets.filter(t => t.priorityScore > 75 && t.status !== 'resolved').slice(0, 5);
+
+    if (loading || !kpiData) {
+        return <div className="p-8 text-center">Loading dashboard...</div>;
+    }
 
     return (
         <div className="space-y-6">
@@ -30,8 +60,8 @@ export default function DashboardPage() {
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
                 <KPICard
                     title="Critical Load"
-                    value={mockKPIData.criticalLoad}
-                    trend={mockKPIData.criticalLoadTrend}
+                    value={kpiData.criticalLoad}
+                    trend={kpiData.criticalLoadTrend}
                     trendLabel="from last hour"
                     variant="critical"
                     pulse={true}
@@ -39,22 +69,22 @@ export default function DashboardPage() {
                 />
                 <KPICard
                     title="SLA Breaches"
-                    value={mockKPIData.slaBreaches}
+                    value={kpiData.slaBreaches}
                     subtitle="Today"
                     variant="warning"
                     icon={<Clock className="h-6 w-6 text-[var(--amber-warning)]" />}
                 />
                 <KPICard
                     title="Active Workforce"
-                    value={`${mockKPIData.activeWorkforce.online}/${mockKPIData.activeWorkforce.total}`}
+                    value={`${kpiData.activeWorkforce.online}/${kpiData.activeWorkforce.total}`}
                     subtitle="Teams Online"
                     variant="success"
                     icon={<Users className="h-6 w-6 text-[var(--emerald-success)]" />}
                 />
                 <KPICard
                     title="Avg Response"
-                    value={`${mockKPIData.avgResponseTime} min`}
-                    trend={mockKPIData.avgResponseTrend}
+                    value={`${kpiData.avgResponseTime} min`}
+                    trend={kpiData.avgResponseTrend}
                     trendLabel="vs yesterday response time"
                     variant="default"
                     icon={<Timer className="h-6 w-6 text-primary" />}
@@ -72,7 +102,7 @@ export default function DashboardPage() {
                 <div className="lg:col-span-1">
                     <ActionStream
                         urgentTickets={urgentTickets}
-                        systemFeed={mockSystemFeed}
+                        systemFeed={systemFeed}
                     />
                 </div>
             </div>

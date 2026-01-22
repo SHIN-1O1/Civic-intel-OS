@@ -11,11 +11,29 @@ import {
     RefreshCw,
     ListFilter
 } from "lucide-react";
-import { mockTickets } from "@/lib/mock-data";
+import { api } from "@/services/api";
+import { Ticket } from "@/lib/types";
 
 export default function TicketsPage() {
+    const [tickets, setTickets] = React.useState<Ticket[]>([]);
     const [selectedTickets, setSelectedTickets] = React.useState<string[]>([]);
     const [showFilters, setShowFilters] = React.useState(true);
+    const [loading, setLoading] = React.useState(true);
+
+    React.useEffect(() => {
+        loadTickets();
+    }, []);
+
+    const loadTickets = async () => {
+        try {
+            const data = await api.getTickets();
+            setTickets(data);
+        } catch (error) {
+            console.error("Failed to load tickets", error);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     const handleSelectTicket = (ticketId: string) => {
         setSelectedTickets((prev) =>
@@ -26,10 +44,10 @@ export default function TicketsPage() {
     };
 
     const handleSelectAll = () => {
-        if (selectedTickets.length === mockTickets.length) {
+        if (selectedTickets.length === tickets.length) {
             setSelectedTickets([]);
         } else {
-            setSelectedTickets(mockTickets.map((t) => t.id));
+            setSelectedTickets(tickets.map((t) => t.id));
         }
     };
 
@@ -44,8 +62,8 @@ export default function TicketsPage() {
                     </p>
                 </div>
                 <div className="flex items-center gap-2">
-                    <Button variant="outline" size="icon">
-                        <RefreshCw className="h-4 w-4" />
+                    <Button variant="outline" size="icon" onClick={loadTickets} disabled={loading}>
+                        <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
                     </Button>
                     <Button variant="outline">
                         <Download className="h-4 w-4 mr-2" />
@@ -98,18 +116,23 @@ export default function TicketsPage() {
             {showFilters && <TicketFilters />}
 
             {/* Data Table */}
-            <TicketTable
-                tickets={mockTickets}
-                selectedTickets={selectedTickets}
-                onSelectTicket={handleSelectTicket}
-                onSelectAll={handleSelectAll}
-            />
+            {loading ? (
+                <div className="flex justify-center py-20">
+                    <RefreshCw className="h-8 w-8 animate-spin text-muted-foreground" />
+                </div>
+            ) : (
+                <TicketTable
+                    tickets={tickets}
+                    selectedTickets={selectedTickets}
+                    onSelectTicket={handleSelectTicket}
+                    onSelectAll={handleSelectAll}
+                />
+            )}
 
             {/* Pagination */}
             <div className="flex items-center justify-between">
                 <p className="text-sm text-muted-foreground">
-                    Showing <span className="font-medium">{mockTickets.length}</span> of{" "}
-                    <span className="font-medium">156</span> tickets
+                    Showing <span className="font-medium">{tickets.length}</span> tickets
                 </p>
                 <div className="flex items-center gap-2">
                     <Button variant="outline" size="sm" disabled>

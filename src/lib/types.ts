@@ -6,6 +6,51 @@ export type SLAStage = 'on_track' | 'at_risk' | 'breached';
 export type TeamStatus = 'available' | 'busy' | 'offline';
 export type UserRole = 'super_admin' | 'ward_officer' | 'dispatcher' | 'field_team';
 
+// Department Portal System
+export type Department =
+    | 'roads_infrastructure'
+    | 'sanitation'
+    | 'electrical'
+    | 'parks_gardens'
+    | 'water_supply'
+    | 'drainage';
+
+export type PortalRole = 'super_admin' | 'department_hq';
+
+export interface PortalUser {
+    id: string;
+    name: string;
+    role: PortalRole;
+    department?: Department;
+}
+
+// Department display names and mappings
+export const DEPARTMENT_LABELS: Record<Department, string> = {
+    roads_infrastructure: 'Roads & Infrastructure',
+    sanitation: 'Sanitation',
+    electrical: 'Electrical',
+    parks_gardens: 'Parks & Gardens',
+    water_supply: 'Water Supply',
+    drainage: 'Drainage'
+};
+
+export const CATEGORY_TO_DEPARTMENT: Record<string, Department> = {
+    'Roads & Infrastructure': 'roads_infrastructure',
+    'Road Issues': 'roads_infrastructure',
+    'Pothole': 'roads_infrastructure',
+    'Sanitation': 'sanitation',
+    'Garbage Pile': 'sanitation',
+    'Healthcare': 'sanitation',
+    'Electrical': 'electrical',
+    'Street Light': 'electrical',
+    'Parks & Gardens': 'parks_gardens',
+    'Tree Fall': 'parks_gardens',
+    'Water Supply': 'water_supply',
+    'Water Leak': 'water_supply',
+    'Drainage': 'drainage',
+    'Drainage Block': 'drainage'
+};
+
 export interface Ticket {
     id: string;
     ticketNumber: number;
@@ -28,6 +73,7 @@ export interface Ticket {
     updatedAt: Date;
     assignedTeam?: string;
     assignedTeamId?: string;
+    assignedDepartment?: Department;
     citizenName?: string;
     citizenPhone?: string;
     imageUrl?: string;
@@ -120,6 +166,8 @@ export interface KPIData {
     };
     avgResponseTime: number; // in minutes
     avgResponseTrend: number; // +/- from yesterday
+    avgResolutionTime?: number; // in hours
+    slaComplianceRate?: number; // percentage
 }
 
 export interface WardStats {
@@ -137,4 +185,21 @@ export interface SystemFeedItem {
     type: 'auto_assign' | 'duplicate_flagged' | 'sla_warning' | 'escalation' | 'resolution';
     message: string;
     ticketId?: string;
+}
+
+// Citizen Report interface (from public-facing app)
+export interface CitizenReport {
+    id: string;
+    userId: string;
+    category: string;
+    description: string;
+    summary: string;
+    location: string; // Full address string
+    severity: 'Low' | 'Medium' | 'High' | 'Critical';
+    status: 'Pending' | 'In Progress' | 'Resolved';
+    timestamp: Date;
+    date: string; // Formatted date string
+    hasImage: boolean;
+    imageUrl?: string;
+    aiVerified: boolean;
 }

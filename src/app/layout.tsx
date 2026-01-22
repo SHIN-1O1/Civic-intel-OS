@@ -8,6 +8,9 @@ export const metadata: Metadata = {
   keywords: ["civic", "government", "admin", "dashboard", "infrastructure"],
 };
 
+import { AuthProvider } from "@/contexts/auth-context";
+import { NotificationsProvider } from "@/contexts/notifications-context";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -15,10 +18,15 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className="antialiased">
-        {children}
-        <Toaster position="top-right" richColors />
+      <body className="antialiased" suppressHydrationWarning>
+        <AuthProvider>
+          <NotificationsProvider>
+            {children}
+            <Toaster position="top-right" richColors />
+          </NotificationsProvider>
+        </AuthProvider>
       </body>
     </html>
   );
 }
+

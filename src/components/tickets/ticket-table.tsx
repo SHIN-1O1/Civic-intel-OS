@@ -96,9 +96,7 @@ export function TicketTable({
                     <TableRow className="hover:bg-transparent">
                         <TableHead className="w-[50px]">
                             <Checkbox
-                                checked={isAllSelected}
-                                // @ts-ignore - indeterminate is a valid prop
-                                indeterminate={isSomeSelected}
+                                checked={isSomeSelected ? "indeterminate" : isAllSelected}
                                 onCheckedChange={onSelectAll}
                             />
                         </TableHead>

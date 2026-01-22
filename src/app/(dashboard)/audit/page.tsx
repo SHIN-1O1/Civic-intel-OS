@@ -31,8 +31,9 @@ import {
     Trash2,
     ShieldCheck
 } from "lucide-react";
-import { mockAuditLogs } from "@/lib/mock-data";
 import { format } from "date-fns";
+import { api } from "@/services/api";
+import { AuditLog } from "@/lib/types";
 
 const actionColors: Record<string, string> = {
     VIEW: "bg-muted text-muted-foreground",
@@ -57,8 +58,25 @@ const actionIcons: Record<string, React.ReactNode> = {
 export default function AuditPage() {
     const [searchQuery, setSearchQuery] = React.useState("");
     const [actionFilter, setActionFilter] = React.useState("all");
+    const [auditLogs, setAuditLogs] = React.useState<AuditLog[]>([]);
+    const [loading, setLoading] = React.useState(true);
 
-    const filteredLogs = mockAuditLogs.filter(log => {
+    React.useEffect(() => {
+        loadAuditLogs();
+    }, []);
+
+    const loadAuditLogs = async () => {
+        try {
+            const logs = await api.getAuditLogs();
+            setAuditLogs(logs);
+        } catch (error) {
+            console.error("Failed to load audit logs", error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const filteredLogs = auditLogs.filter(log => {
         const matchesSearch =
             log.userName.toLowerCase().includes(searchQuery.toLowerCase()) ||
             log.targetId.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -68,6 +86,10 @@ export default function AuditPage() {
 
         return matchesSearch && matchesAction;
     });
+
+    if (loading) {
+        return <div className="p-8 text-center">Loading audit logs...</div>;
+    }
 
     return (
         <div className="space-y-6">

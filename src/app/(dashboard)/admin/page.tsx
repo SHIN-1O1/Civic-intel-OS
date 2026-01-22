@@ -38,10 +38,50 @@ import {
     Trash2,
     Key
 } from "lucide-react";
-import { mockUsers } from "@/lib/mock-data";
 import { format } from "date-fns";
+import { api } from "@/services/api";
+import { User } from "@/lib/types";
+import { toast } from "sonner";
+import { FirebaseService } from "@/services/firebase-service";
 
 export default function AdminPage() {
+    const [users, setUsers] = React.useState<User[]>([]);
+    const [loading, setLoading] = React.useState(true);
+    const [isSeeding, setIsSeeding] = React.useState(false);
+
+    React.useEffect(() => {
+        loadUsers();
+    }, []);
+
+    const loadUsers = async () => {
+        try {
+            const data = await api.getUsers();
+            setUsers(data);
+        } catch (error) {
+            console.error("Failed to load users", error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleSeed = async () => {
+        setIsSeeding(true);
+        try {
+            // Explicitly cast or instantiate FirebaseService if we are not in Demo mode.
+            // Since api factory handles it, we can't be sure if api is FirebaseService unless we check/cast.
+            // But for seeding, we specifically want Firebase functionality.
+            const firebaseService = new FirebaseService();
+            await firebaseService.seedDatabase();
+            toast.success("Database seeded successfully");
+            loadUsers(); // Reload to show new data
+        } catch (error) {
+            console.error("Seeding failed", error);
+            toast.error("Failed to seed database");
+        } finally {
+            setIsSeeding(false);
+        }
+    };
+
     return (
         <div className="space-y-6">
             {/* Header */}
@@ -109,13 +149,17 @@ export default function AdminPage() {
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
-                                    {mockUsers.map((user) => (
+                                    {loading ? (
+                                        <TableRow>
+                                            <TableCell colSpan={6} className="text-center h-24">Loading users...</TableCell>
+                                        </TableRow>
+                                    ) : users.map((user) => (
                                         <TableRow key={user.id}>
                                             <TableCell>
                                                 <div className="flex items-center gap-3">
                                                     <Avatar>
                                                         <AvatarFallback>
-                                                            {user.name.split(" ").map(n => n[0]).join("")}
+                                                            {user.name?.split(" ").map(n => n[0]).join("") || "U"}
                                                         </AvatarFallback>
                                                     </Avatar>
                                                     <div>
@@ -126,7 +170,7 @@ export default function AdminPage() {
                                             </TableCell>
                                             <TableCell>
                                                 <Badge variant="outline" className="capitalize">
-                                                    {user.role.replace(/_/g, " ")}
+                                                    {user.role?.replace(/_/g, " ") || "No Role"}
                                                 </Badge>
                                             </TableCell>
                                             <TableCell className="text-muted-foreground">
@@ -278,7 +322,7 @@ export default function AdminPage() {
                                     <Input defaultValue="City Municipal Corporation" />
                                 </div>
                                 <div className="space-y-2">
-                                    <Label>Default Timezone</Label>
+                                    <Label>Time Zone</Label>
                                     <Select defaultValue="ist">
                                         <SelectTrigger>
                                             <SelectValue />
@@ -288,6 +332,20 @@ export default function AdminPage() {
                                             <SelectItem value="utc">UTC</SelectItem>
                                         </SelectContent>
                                     </Select>
+                                </div>
+                                <div className="space-y-2">
+                                    <Label>Database Management</Label>
+                                    <div className="flex items-center gap-4">
+                                        <Button
+                                            onClick={handleSeed}
+                                            disabled={isSeeding}
+                                            variant="outline"
+                                            className="w-full sm:w-auto"
+                                        >
+                                            {isSeeding ? "Seeding..." : "Seed Database"}
+                                        </Button>
+                                        <p className="text-xs text-muted-foreground">Reset database to initial demo state</p>
+                                    </div>
                                 </div>
                                 <div className="space-y-2">
                                     <Label>Date Format</Label>
@@ -383,10 +441,10 @@ export default function AdminPage() {
                     <div className="flex justify-end">
                         <Button>Save Settings</Button>
                     </div>
-                </TabsContent>
+                </TabsContent >
 
                 {/* Notifications Tab */}
-                <TabsContent value="notifications" className="mt-6">
+                < TabsContent value="notifications" className="mt-6" >
                     <Card>
                         <CardHeader>
                             <CardTitle className="flex items-center gap-2">
@@ -436,8 +494,8 @@ export default function AdminPage() {
                             </div>
                         </CardContent>
                     </Card>
-                </TabsContent>
-            </Tabs>
-        </div>
+                </TabsContent >
+            </Tabs >
+        </div >
     );
 }

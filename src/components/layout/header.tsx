@@ -1,9 +1,8 @@
 "use client";
 
 import * as React from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Bell, Search, Moon, Sun, User, ChevronDown, LogOut } from "lucide-react";
+import { Search, Moon, Sun, User, ChevronDown, LogOut, Shield, Building2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -16,10 +15,14 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import { NotificationBell } from "@/components/notifications/notification-bell";
+import { useAuth } from "@/contexts/auth-context";
+import { cn } from "@/lib/utils";
 
 export function Header() {
     const [isDark, setIsDark] = React.useState(true);
     const router = useRouter();
+    const { user, portalUser, signOut, isSuperAdmin, departmentLabel, loading } = useAuth();
 
     React.useEffect(() => {
         // Set dark mode by default for "Control Room" feel
@@ -31,9 +34,25 @@ export function Header() {
         document.documentElement.classList.toggle("dark");
     };
 
-    const handleSignOut = () => {
-        // Navigate to login page
-        router.push("/login");
+    const handleSignOut = async () => {
+        await signOut();
+    };
+
+    // Get user initials for avatar
+    const getInitials = () => {
+        if (!portalUser?.name) return "AD";
+        const parts = portalUser.name.split(" ");
+        if (parts.length >= 2) {
+            return (parts[0][0] + parts[1][0]).toUpperCase();
+        }
+        return portalUser.name.slice(0, 2).toUpperCase();
+    };
+
+    // Get role display text
+    const getRoleDisplay = () => {
+        if (isSuperAdmin) return "Super Admin";
+        if (departmentLabel) return `${departmentLabel} HQ`;
+        return "User";
     };
 
     return (
@@ -63,6 +82,26 @@ export function Header() {
                     </span>
                 </div>
 
+                {/* Role Badge */}
+                {portalUser && (
+                    <Badge
+                        variant="outline"
+                        className={cn(
+                            "hidden sm:flex items-center gap-1.5 px-2.5 py-1",
+                            isSuperAdmin
+                                ? "border-primary/50 text-primary"
+                                : "border-emerald-500/50 text-emerald-600 dark:text-emerald-400"
+                        )}
+                    >
+                        {isSuperAdmin ? (
+                            <Shield className="h-3 w-3" />
+                        ) : (
+                            <Building2 className="h-3 w-3" />
+                        )}
+                        <span className="text-xs font-medium">{getRoleDisplay()}</span>
+                    </Badge>
+                )}
+
                 {/* Theme toggle */}
                 <Button variant="ghost" size="icon" onClick={toggleTheme}>
                     {isDark ? (
@@ -73,72 +112,27 @@ export function Header() {
                 </Button>
 
                 {/* Notifications */}
-                <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon" className="relative">
-                            <Bell className="h-5 w-5" />
-                            <Badge className="absolute -right-1 -top-1 h-5 w-5 rounded-full p-0 text-[10px]">
-                                3
-                            </Badge>
-                        </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="w-80">
-                        <DropdownMenuLabel className="flex items-center justify-between">
-                            <span>Notifications</span>
-                            <Button variant="ghost" size="sm" className="h-auto p-0 text-xs text-muted-foreground">
-                                Mark all read
-                            </Button>
-                        </DropdownMenuLabel>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem className="flex flex-col items-start gap-1 p-3">
-                            <div className="flex items-center gap-2">
-                                <span className="h-2 w-2 rounded-full bg-destructive"></span>
-                                <span className="text-sm font-medium">SLA Breach Alert</span>
-                            </div>
-                            <p className="text-xs text-muted-foreground">
-                                Ticket #1021 has breached SLA deadline
-                            </p>
-                            <span className="text-[10px] text-muted-foreground">2 minutes ago</span>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem className="flex flex-col items-start gap-1 p-3">
-                            <div className="flex items-center gap-2">
-                                <span className="h-2 w-2 rounded-full bg-amber-500"></span>
-                                <span className="text-sm font-medium">Priority Escalation</span>
-                            </div>
-                            <p className="text-xs text-muted-foreground">
-                                Ticket #1024 escalated to critical priority
-                            </p>
-                            <span className="text-[10px] text-muted-foreground">15 minutes ago</span>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem className="flex flex-col items-start gap-1 p-3">
-                            <div className="flex items-center gap-2">
-                                <span className="h-2 w-2 rounded-full bg-primary"></span>
-                                <span className="text-sm font-medium">New Assignment</span>
-                            </div>
-                            <p className="text-xs text-muted-foreground">
-                                3 tickets auto-assigned to available teams
-                            </p>
-                            <span className="text-[10px] text-muted-foreground">30 minutes ago</span>
-                        </DropdownMenuItem>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem className="justify-center text-sm text-primary">
-                            View all notifications
-                        </DropdownMenuItem>
-                    </DropdownMenuContent>
-                </DropdownMenu>
+                <NotificationBell />
 
                 {/* User menu */}
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                         <Button variant="ghost" className="flex items-center gap-2 pl-2 pr-1">
                             <Avatar className="h-8 w-8">
-                                <AvatarFallback className="bg-primary text-primary-foreground text-sm">
-                                    AD
+                                <AvatarFallback className={cn(
+                                    "text-sm text-white",
+                                    isSuperAdmin ? "bg-primary" : "bg-emerald-600"
+                                )}>
+                                    {getInitials()}
                                 </AvatarFallback>
                             </Avatar>
                             <div className="flex flex-col items-start text-left">
-                                <span className="text-sm font-medium">Administrator</span>
-                                <span className="text-[10px] text-muted-foreground">Super Admin</span>
+                                <span className="text-sm font-medium">
+                                    {portalUser?.name || "Loading..."}
+                                </span>
+                                <span className="text-[10px] text-muted-foreground">
+                                    {getRoleDisplay()}
+                                </span>
                             </div>
                             <ChevronDown className="h-4 w-4 text-muted-foreground" />
                         </Button>
