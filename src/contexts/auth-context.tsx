@@ -78,6 +78,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             if (firebaseUser) {
                 // Token has been refreshed, update user state
                 setUser(firebaseUser);
+
+                // Set cookie for middleware
+                try {
+                    const token = await firebaseUser.getIdToken();
+                    // Set secure cookie
+                    document.cookie = `firebase-auth-token=${token}; path=/; max-age=3600; SameSite=Lax`;
+                } catch (e) {
+                    console.error('[Auth] Failed to set auth cookie:', e);
+                }
+            } else {
+                // Clear cookie
+                document.cookie = `firebase-auth-token=; path=/; max-age=0`;
             }
         });
 
@@ -105,6 +117,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     const signOut = async () => {
         await firebaseSignOut(auth);
+        document.cookie = `firebase-auth-token=; path=/; max-age=0`;
         setPortalUser(null);
         router.push('/portal-select');
     };

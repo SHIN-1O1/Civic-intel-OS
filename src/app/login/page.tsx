@@ -16,7 +16,13 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import { Separator } from "@/components/ui/separator";
 
+import { useAuth } from "@/contexts/auth-context";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
+
 export default function LoginPage() {
+    const { signIn } = useAuth();
+    const router = useRouter();
     const [officerId, setOfficerId] = React.useState("");
     const [password, setPassword] = React.useState("");
     const [role, setRole] = React.useState("");
@@ -25,10 +31,18 @@ export default function LoginPage() {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsLoading(true);
-        // Simulate login - redirect to dashboard
-        setTimeout(() => {
-            window.location.href = "/";
-        }, 1000);
+
+        try {
+            // "Officer ID" is treated as email for now
+            await signIn(officerId, password);
+            router.push("/");
+            toast.success("Welcome back!");
+        } catch (error: any) {
+            console.error("Login failed:", error);
+            toast.error("Login failed. Check your credentials.");
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     return (
