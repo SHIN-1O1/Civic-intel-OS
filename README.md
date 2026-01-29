@@ -1,38 +1,79 @@
-# Civic Intelligence OS
+# Civic Intelligence OS (Civic-intel-OS)
 
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+A premium, government-grade administrative dashboard and citizen engagement platform designed for real-time city management. Civic Intelligence OS streamlines urban governance through automated ticket assessment, intelligent workforce dispatching, and multi-departmental coordination.
 
-## Getting Started
+## 🚀 Key Features
 
-First, run the development server:
+### 🏛️ Unified Command Center
+- **Dynamic Dispatch Map**: Real-time tracking of all field teams with live status indicators (Available, Busy, Offline).
+- **Smart Auto-Assign**: Intelligent algorithm that matches ticket categories to specific departments and available teams with the lowest current workload.
+- **Priority Scoring**: AI-driven priority assessment for all incoming complaints to ensure critical issues (Roads, Sanitation, Water) are addressed first.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+### 🛡️ Role-Based Access Control (RBAC)
+- **Super Admin**: Full oversight of all departments, portal users, and field teams. Capability to manage system-wide settings and audit logs.
+- **Department HQ**: Dedicated portals for 6 key departments:
+  - Roads & Infrastructure
+  - Sanitation
+  - Electrical
+  - Parks & Gardens
+  - Water Supply
+  - Drainage
+- **Team Management**: Portals allow Department HQs to manage their own team rosters, members, and shift capacities.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 🤖 AI Integration
+- **Gemini-Powered Assessment**: Automatic categorization and severity evaluation of citizen complaints.
+- **Automated Summarization**: Concise AI-generated summaries for every reported issue to speed up response times.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 🛠️ Technology Stack
+- **Frontend**: Next.js 16 (App Router), React, TailwindCSS, Lucide Icons.
+- **State Management**: React Context API & Hooks.
+- **Backend/Database**: Firebase Firestore, Firebase Authentication.
+- **Map Services**: Leaflet.js with OpenStreetMap.
+- **AI**: Google Gemini Pro.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 📋 Role Architecture (Latest Update)
+The system has been modernized to remove legacy intermediary roles, focusing on a direct Command-to-Execution pipeline:
+- **Command**: Super Admin / Department HQ
+- **Execution**: Field Teams (Managed by HQ)
 
-## Learn More
+## 🔧 Installation & Setup
 
-To learn more about Next.js, take a look at the following resources:
+1. **Clone the Project**:
+   ```bash
+   git clone -b aeztrix https://github.com/SHIN-1O1/Civic-intel-OS.git
+   cd Civic-intel-OS
+   ```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+2. **Install Dependencies**:
+   ```bash
+   npm install
+   ```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+3. **Configure Environment Variables**:
+   Create a `.env.local` file in the root directory:
+   ```env
+   NEXT_PUBLIC_FIREBASE_API_KEY=your_key
+   NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=your_domain
+   NEXT_PUBLIC_FIREBASE_PROJECT_ID=your_project_id
+   NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=your_bucket
+   NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=your_sender_id
+   NEXT_PUBLIC_FIREBASE_APP_ID=your_app_id
+   GEMINI_API_KEY=your_gemini_key
+   ```
 
-## Deploy on Vercel
+4. **Run Development Server**:
+   ```bash
+   npm run dev
+   ```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+5. **Firestore Rules**:
+   Deploy the provided `firestore.rules` for proper security and ticket assignment permissions.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## 📈 Recent Enhancements
+- **Cleaned up legacy roles** (`ward_officer`, `dispatcher`).
+- **Fixed Ticket Assignment permissions** allowing portal users to manage citizen complaints.
+- **Implemented Team Member management** capability for Department HQ.
+- **Resolved state serialization issues** in Firestore team creation.
+
+---
+*Built for the future of urban governance.*

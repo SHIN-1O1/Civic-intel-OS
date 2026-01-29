@@ -1,4 +1,4 @@
-import { Ticket, Team, User, AuditLog, KPIData, WardStats, SystemFeedItem } from '@/lib/types';
+import { Ticket, Team, User, AuditLog, KPIData, WardStats, SystemFeedItem, PortalUser, SystemConfig } from '@/lib/types';
 
 export interface ApiService {
     // Tickets
@@ -9,10 +9,17 @@ export interface ApiService {
 
     // Teams
     getTeams(): Promise<Team[]>;
+    createTeam(team: Omit<Team, 'id' | 'status' | 'role' | 'currentTask' | 'currentTaskLocation' | 'location' | 'members' | 'shiftEnd' | 'capacity'> & { shiftEnd?: Date | string; maxCapacity?: number }): Promise<Team>;
     updateTeam(id: string, updates: Partial<Team>): Promise<Team>;
+    deleteTeam(id: string): Promise<void>;
 
     // Users
     getUsers(): Promise<User[]>;
+    createUser(user: Omit<User, 'id' | 'lastLogin' | 'isActive'>): Promise<User>;
+
+    // Portal Users
+    getPortalUsers(): Promise<PortalUser[]>;
+    deletePortalUser(id: string): Promise<void>;
 
     // Analytics
     getKPIData(): Promise<KPIData>;
@@ -20,6 +27,10 @@ export interface ApiService {
     getAuditLogs(): Promise<AuditLog[]>;
     getSystemFeed(): Promise<SystemFeedItem[]>;
 
+    // System Config
+    getSystemConfig(): Promise<SystemConfig>;
+
     // AI
     assessTicket(ticket: Ticket): Promise<Ticket>;
 }
+

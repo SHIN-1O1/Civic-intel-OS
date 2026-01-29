@@ -1,0 +1,336 @@
+[?1049h
+
+
+
+
+
+
+
+
+                          No repository data available
+
+
+                      Make sure you're in a git repository
+
+
+
+
+
+
+
+
+
+  t: Show file tree  |  s: Switch Organization  |  l: Logout
+                                                           ⣾ Authenticating...
+[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[G
+
+
+
+
+
+
+
+
+
+                           ⢎  Loading repository data
+
+
+
+
+
+
+
+
+
+
+  t: Show file tree  |  CTRL + d: Delete last session
+  s: Switch Organization  |  l: Logout
+                                                           ⣽ Authenticating...
+[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[G
+
+
+
+
+
+
+
+
+
+                           ⠎⠁ Loading repository data
+
+
+
+
+
+
+
+
+
+
+  t: Show file tree  |  CTRL + d: Delete last session
+  s: Switch Organization  |  l: Logout
+                                                           ⣽ Authenticating...
+[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[G
+
+
+
+
+
+
+
+
+
+                           ⠎⠁ Loading repository data
+
+
+
+
+
+
+
+
+
+
+  t: Show file tree  |  CTRL + d: Delete last session
+  s: Switch Organization  |  l: Logout
+                                                           ⣻ Authenticating...
+[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[G
+
+
+
+
+
+
+
+
+
+                           ⠊⠑ Loading repository data
+
+
+
+
+
+
+
+
+
+
+  t: Show file tree  |  CTRL + d: Delete last session
+  s: Switch Organization  |  l: Logout
+                                                           ⣻ Authenticating...
+[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[G
+
+
+
+
+
+
+
+
+
+                           ⠊⠑ Loading repository data
+
+
+
+
+
+
+
+
+
+
+  t: Show file tree  |  CTRL + d: Delete last session
+  s: Switch Organization  |  l: Logout
+                                                           ⢿ Authenticating...
+[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[G
+
+
+
+
+
+
+
+
+
+                           ⠈⠱ Loading repository data
+
+
+
+
+
+
+
+
+
+
+  t: Show file tree  |  CTRL + d: Delete last session
+  s: Switch Organization  |  l: Logout
+                                                           ⢿ Authenticating...
+[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[G
+
+                                 ██████  ██████
+                                ██░░░░░  ██░░░██
+                                ██░░     ██████░
+                                ██░░     ██░░░██
+                                 ██████░ ██░░░██
+                                  ░░░░░░  ░░   ░░
+
+
+
+                   repo: /home/sherwin/projects/Civic-intel-OS
+
+                       comparing: karv → origin/karv (base)
+
+                     📁 119 Files changed
+                        112 added | 2 modified | 5 deleted
+                        +33717 insertions | -2057 deletions
+
+                         Hit Space to view last session
+
+  t: Show file tree  |  CTRL + d: Delete last session
+  s: Switch Organization  |  l: Logout
+                                                           ⡿ Authenticating...
+[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[G
+
+                                 ██████  ██████
+                                ██░░░░░  ██░░░██
+                                ██░░     ██████░
+                                ██░░     ██░░░██
+                                 ██████░ ██░░░██
+                                  ░░░░░░  ░░   ░░
+
+
+
+                   repo: /home/sherwin/projects/Civic-intel-OS
+
+                       comparing: karv → origin/karv (base)
+
+                     📁 119 Files changed
+                        112 added | 2 modified | 5 deleted
+                        +33717 insertions | -2057 deletions
+
+                         Hit Space to view last session
+
+  t: Show file tree  |  CTRL + d: Delete last session
+  s: Switch Organization  |  l: Logout
+                                                           ⣟ Authenticating...
+[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[G
+
+                                 ██████  ██████
+                                ██░░░░░  ██░░░██
+                                ██░░     ██████░
+                                ██░░     ██░░░██
+                                 ██████░ ██░░░██
+                                  ░░░░░░  ░░   ░░
+
+
+
+                   repo: /home/sherwin/projects/Civic-intel-OS
+
+                       comparing: karv → origin/karv (base)
+
+                     📁 119 Files changed
+                        112 added | 2 modified | 5 deleted
+                        +33717 insertions | -2057 deletions
+
+                         Hit Space to view last session
+
+  t: Show file tree  |  CTRL + d: Delete last session
+  s: Switch Organization  |  l: Logout
+                                                           ⣯ Authenticating...
+[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[G
+
+                                 ██████  ██████
+                                ██░░░░░  ██░░░██
+                                ██░░     ██████░
+                                ██░░     ██░░░██
+                                 ██████░ ██░░░██
+                                  ░░░░░░  ░░   ░░
+
+
+
+                   repo: /home/sherwin/projects/Civic-intel-OS
+
+                       comparing: karv → origin/karv (base)
+
+                     📁 119 Files changed
+                        112 added | 2 modified | 5 deleted
+                        +33717 insertions | -2057 deletions
+
+                         Hit Space to view last session
+
+  t: Show file tree  |  CTRL + d: Delete last session
+  s: Switch Organization  |  l: Logout
+                                                           ⣷ Authenticating...
+[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[G
+
+                                 ██████  ██████
+                                ██░░░░░  ██░░░██
+                                ██░░     ██████░
+                                ██░░     ██░░░██
+                                 ██████░ ██░░░██
+                                  ░░░░░░  ░░   ░░
+
+
+
+                   repo: /home/sherwin/projects/Civic-intel-OS
+
+                       comparing: karv → origin/karv (base)
+
+                     📁 119 Files changed
+                        112 added | 2 modified | 5 deleted
+                        +33717 insertions | -2057 deletions
+
+                         Hit Space to view last session
+
+  t: Show file tree  |  CTRL + d: Delete last session
+  s: Switch Organization  |  l: Logout
+                                                           ⣾ Authenticating...
+[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[G
+
+                                 ██████  ██████
+                                ██░░░░░  ██░░░██
+                                ██░░     ██████░
+                                ██░░     ██░░░██
+                                 ██████░ ██░░░██
+                                  ░░░░░░  ░░   ░░
+
+
+
+                   repo: /home/sherwin/projects/Civic-intel-OS
+
+                       comparing: karv → origin/karv (base)
+
+                     📁 119 Files changed
+                        112 added | 2 modified | 5 deleted
+                        +33717 insertions | -2057 deletions
+
+                         Hit Space to view last session
+
+  t: Show file tree  |  CTRL + d: Delete last session
+  s: Switch Organization  |  l: Logout
+                                                           ⣽ Authenticating...
+[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[G
+
+                                 ██████  ██████
+                                ██░░░░░  ██░░░██
+                                ██░░     ██████░
+                                ██░░     ██░░░██
+                                 ██████░ ██░░░██
+                                  ░░░░░░  ░░   ░░
+
+
+
+                   repo: /home/sherwin/projects/Civic-intel-OS
+
+                       comparing: karv → origin/karv (base)
+
+                     📁 119 Files changed
+                        112 added | 2 modified | 5 deleted
+                        +33717 insertions | -2057 deletions
+
+                         Hit Space to view last session
+
+  t: Show file tree  |  CTRL + d: Delete last session
+  s: Switch Organization  |  l: Logout
+                             ✔ SHIN-1O1 @ SHIN-1O1 [FREE] /Upgrade to Pro

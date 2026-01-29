@@ -15,13 +15,15 @@ import {
     ArrowLeft,
     Truck,
     CheckCircle2,
-    XCircle
+    XCircle,
+    Edit
 } from "lucide-react";
 import { useAuth } from "@/contexts/auth-context";
 import { Department, DEPARTMENT_LABELS, Team } from "@/lib/types";
 import { FirebaseService } from "@/services/firebase-service";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
+import { EditTeamModal } from "@/components/admin/edit-team-modal";
 
 const firebaseService = new FirebaseService();
 
@@ -33,6 +35,17 @@ export default function DepartmentTeamsPage() {
 
     const [teams, setTeams] = React.useState<Team[]>([]);
     const [loading, setLoading] = React.useState(true);
+    const [editTeamModalOpen, setEditTeamModalOpen] = React.useState(false);
+    const [selectedTeam, setSelectedTeam] = React.useState<Team | null>(null);
+
+    const handleEditTeam = (team: Team) => {
+        setSelectedTeam(team);
+        setEditTeamModalOpen(true);
+    };
+
+    const handleEditSuccess = () => {
+        // Teams will refresh via real-time subscription
+    };
 
     // Validate department
     const isValidDepartment = department && DEPARTMENT_LABELS[department];
@@ -286,11 +299,30 @@ export default function DepartmentTeamsPage() {
                                         </div>
                                     </div>
                                 )}
+                                {/* Edit Button */}
+                                <div className="pt-3 border-t">
+                                    <Button
+                                        variant="outline"
+                                        className="w-full"
+                                        onClick={() => handleEditTeam(team)}
+                                    >
+                                        <Edit className="h-4 w-4 mr-2" />
+                                        Manage Team
+                                    </Button>
+                                </div>
                             </CardContent>
                         </Card>
                     ))
                 )}
             </div>
+
+            {/* Edit Team Modal */}
+            <EditTeamModal
+                open={editTeamModalOpen}
+                onOpenChange={setEditTeamModalOpen}
+                team={selectedTeam}
+                onSuccess={handleEditSuccess}
+            />
         </div>
     );
 }

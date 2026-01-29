@@ -165,8 +165,7 @@ export default function LoginPage() {
                                     </SelectTrigger>
                                     <SelectContent>
                                         <SelectItem value="super_admin">Super Admin</SelectItem>
-                                        <SelectItem value="ward_officer">Ward Officer</SelectItem>
-                                        <SelectItem value="dispatcher">Dispatcher</SelectItem>
+                                        <SelectItem value="department_hq">Department HQ</SelectItem>
                                     </SelectContent>
                                 </Select>
                             </div>

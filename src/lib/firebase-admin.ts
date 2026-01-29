@@ -24,9 +24,8 @@ export const adminDb = () => getFirestore(getAdminApp());
 
 // Extended token type with role information
 export interface DecodedTokenWithRole extends DecodedIdToken {
-    role?: 'super_admin' | 'dispatcher' | 'ward_officer' | 'analyst' | 'department_hq';
+    role?: 'super_admin' | 'department_hq';
     department?: string;
-    wardAssignment?: string;
 }
 
 /**
@@ -76,10 +75,7 @@ export async function verifyFirebaseToken(
 // RBAC permission matrix
 export const ROLE_PERMISSIONS = {
     super_admin: ['read', 'write', 'delete', 'assign', 'admin', 'audit', 'ai_assess'],
-    dispatcher: ['read', 'write', 'assign', 'ai_assess'],
-    ward_officer: ['read', 'write_own_ward'],
-    analyst: ['read'],
-    department_hq: ['read_department', 'write_department'],
+    department_hq: ['read_department', 'write_department', 'assign_department'],
 } as const;
 
 export type Permission =
@@ -90,9 +86,9 @@ export type Permission =
     | 'admin'
     | 'audit'
     | 'ai_assess'
-    | 'write_own_ward'
     | 'read_department'
-    | 'write_department';
+    | 'write_department'
+    | 'assign_department';
 
 /**
  * Check if a role has a specific permission
@@ -122,20 +118,9 @@ export function canAccessTicket(
         return { canRead: false, canWrite: false };
     }
 
-    // Super admin and dispatcher have full access
-    if (role === 'super_admin' || role === 'dispatcher') {
+    // Super admin has full access
+    if (role === 'super_admin') {
         return { canRead: true, canWrite: true };
-    }
-
-    // Analyst has read-only access to all
-    if (role === 'analyst') {
-        return { canRead: true, canWrite: false };
-    }
-
-    // Ward officer can only access tickets in their ward
-    if (role === 'ward_officer') {
-        const isOwnWard = ticketData.location?.ward === user.wardAssignment;
-        return { canRead: true, canWrite: isOwnWard };
     }
 
     // Department HQ can only access tickets assigned to their department

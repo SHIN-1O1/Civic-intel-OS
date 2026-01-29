@@ -105,10 +105,16 @@ export default function DispatchPage() {
         });
 
         // For teams, we still fetch all for Super Admin view
-        api.getTeams().then(teamsData => {
-            setTeams(teamsData);
-            setMapReady(true);
-        });
+        api.getTeams()
+            .then(teamsData => {
+                setTeams(teamsData);
+                setMapReady(true);
+            })
+            .catch(error => {
+                console.error("Failed to fetch teams:", error);
+                setTeams([]);
+                setMapReady(true); // Allow UI to render even without teams
+            });
 
         return () => {
             unsubscribeTickets();
@@ -473,8 +479,16 @@ export default function DispatchPage() {
                             return (
                                 <div
                                     key={ticket.id}
-                                    className="flex-shrink-0 w-72 rounded-lg border border-border p-4 cursor-pointer hover:border-primary transition-colors"
+                                    className="flex-shrink-0 w-72 rounded-lg border border-border p-4 cursor-pointer hover:border-primary transition-colors focus:outline-none focus:ring-2 focus:ring-primary"
                                     onClick={() => handleOpenAssignDialog(ticket)}
+                                    role="button"
+                                    tabIndex={0}
+                                    onKeyDown={(e) => {
+                                        if (e.key === 'Enter' || e.key === ' ') {
+                                            e.preventDefault();
+                                            handleOpenAssignDialog(ticket);
+                                        }
+                                    }}
                                 >
                                     <div className="flex items-center justify-between mb-2">
                                         <span className="font-medium">#{ticket.ticketNumber}</span>
@@ -502,11 +516,11 @@ export default function DispatchPage() {
                                             Score: {ticket.priorityScore}
                                         </span>
                                     </div>
-                                    <Button size="sm" className="w-full mt-3" variant="outline">
-                                        <CheckCircle2 className="h-3 w-3 mr-1" />
-                                        Assign Team
-                                    </Button>
+                                    <div className="w-full mt-3 text-center text-xs text-primary font-medium">
+                                        Click to assign →
+                                    </div>
                                 </div>
+
                             );
                         })}
                         {unassignedTickets.length === 0 && (
@@ -531,7 +545,13 @@ export default function DispatchPage() {
                     <div className="space-y-4 py-4">
                         {/* Ticket Info */}
                         <div className="rounded-lg bg-muted/50 p-3 text-sm">
-                            <p className="font-medium">{selectedTicket?.description?.slice(0, 100)}...</p>
+                            <p className="font-medium">
+                                {selectedTicket?.description
+                                    ? selectedTicket.description.length > 100
+                                        ? `${selectedTicket.description.slice(0, 100)}...`
+                                        : selectedTicket.description
+                                    : "No description"}
+                            </p>
                             <p className="text-muted-foreground mt-1">📍 {selectedTicket?.location.ward}</p>
                         </div>
 
@@ -575,7 +595,7 @@ export default function DispatchPage() {
                                         ))}
                                 </SelectContent>
                             </Select>
-                            {filteredTeams.filter(t => t.status === 'available').length === 0 && (
+                            {filteredTeams.filter(t => t.status === 'available' && t.capacity.current < t.capacity.max).length === 0 && (
                                 <p className="text-xs text-muted-foreground">
                                     No available teams in this department
                                 </p>

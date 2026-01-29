@@ -33,54 +33,116 @@ import {
     Database,
     Globe,
     UserPlus,
-    MoreHorizontal,
     Edit,
     Trash2,
-    Key
+    Building2,
+    Loader2
 } from "lucide-react";
 import { format } from "date-fns";
 import { api } from "@/services/api";
-import { User } from "@/lib/types";
+import { Team, PortalUser, DEPARTMENT_LABELS, Department } from "@/lib/types";
 import { toast } from "sonner";
-import { FirebaseService } from "@/services/firebase-service";
+import { AddTeamModal } from "@/components/admin/add-team-modal";
+import { AddPortalUserModal } from "@/components/admin/add-portal-user-modal";
+import { EditTeamModal } from "@/components/admin/edit-team-modal";
 
 export default function AdminPage() {
-    const [users, setUsers] = React.useState<User[]>([]);
+    const [teams, setTeams] = React.useState<Team[]>([]);
+    const [portalUsers, setPortalUsers] = React.useState<PortalUser[]>([]);
     const [loading, setLoading] = React.useState(true);
-    const [isSeeding, setIsSeeding] = React.useState(false);
+    const [clearingData, setClearingData] = React.useState(false);
+
+    // UI State
+    const [teamModalOpen, setTeamModalOpen] = React.useState(false);
+    const [portalUserModalOpen, setPortalUserModalOpen] = React.useState(false);
+    const [editTeamModalOpen, setEditTeamModalOpen] = React.useState(false);
+    const [selectedTeam, setSelectedTeam] = React.useState<Team | null>(null);
+    const [deletingId, setDeletingId] = React.useState<string | null>(null);
 
     React.useEffect(() => {
-        loadUsers();
+        loadData();
     }, []);
 
-    const loadUsers = async () => {
+    const handleClearData = async () => {
+        if (!confirm("Are you sure you want to delete ALL tickets, teams, users, and other seeded data from Firebase? This action cannot be undone.")) {
+            return;
+        }
+
+        setClearingData(true);
         try {
-            const data = await api.getUsers();
-            setUsers(data);
+            const response = await fetch('/api/admin/clear-data', { method: 'DELETE' });
+            const data = await response.json();
+
+            if (response.ok) {
+                toast.success("Database cleared successfully");
+                console.log("Deleted counts:", data.deletedCounts);
+                loadData(); // Refresh the data
+            } else {
+                toast.error(data.error || "Failed to clear database");
+            }
         } catch (error) {
-            console.error("Failed to load users", error);
+            console.error("Error clearing data:", error);
+            toast.error("Failed to clear database");
+        } finally {
+            setClearingData(false);
+        }
+    };
+
+    const loadData = async () => {
+        try {
+            const [teamsData, portalUsersData] = await Promise.all([
+                api.getTeams(),
+                api.getPortalUsers()
+            ]);
+            setTeams(teamsData);
+            setPortalUsers(portalUsersData);
+        } catch (error) {
+            console.error("Failed to load admin data", error);
+            toast.error("Failed to load data");
         } finally {
             setLoading(false);
         }
     };
 
-    const handleSeed = async () => {
-        setIsSeeding(true);
+    const handleDeleteTeam = async (teamId: string) => {
+        if (!confirm("Are you sure you want to delete this team?")) return;
+
         try {
-            // Explicitly cast or instantiate FirebaseService if we are not in Demo mode.
-            // Since api factory handles it, we can't be sure if api is FirebaseService unless we check/cast.
-            // But for seeding, we specifically want Firebase functionality.
-            const firebaseService = new FirebaseService();
-            await firebaseService.seedDatabase();
-            toast.success("Database seeded successfully");
-            loadUsers(); // Reload to show new data
+            setDeletingId(teamId);
+            await api.deleteTeam(teamId);
+            toast.success("Team deleted successfully");
+            loadData();
         } catch (error) {
-            console.error("Seeding failed", error);
-            toast.error("Failed to seed database");
+            console.error(error);
+            toast.error("Failed to delete team");
         } finally {
-            setIsSeeding(false);
+            setDeletingId(null);
         }
     };
+
+    const handleDeletePortalUser = async (userId: string) => {
+        if (!confirm("Are you sure you want to delete this portal user? This will also delete their Firebase Auth account.")) return;
+
+        try {
+            setDeletingId(userId);
+            const response = await fetch(`/api/portal-users?id=${userId}`, { method: 'DELETE' });
+            if (!response.ok) throw new Error('Failed to delete');
+            toast.success("Portal user deleted successfully");
+            loadData();
+        } catch (error) {
+            console.error(error);
+            toast.error("Failed to delete portal user");
+        } finally {
+            setDeletingId(null);
+        }
+    };
+
+    const handleEditTeam = (team: Team) => {
+        setSelectedTeam(team);
+        setEditTeamModalOpen(true);
+    };
+
+    const departments = Object.entries(DEPARTMENT_LABELS) as [Department, string][];
 
     return (
         <div className="space-y-6">
@@ -92,11 +154,15 @@ export default function AdminPage() {
                 </p>
             </div>
 
-            <Tabs defaultValue="users">
+            <Tabs defaultValue="portal-users">
                 <TabsList>
-                    <TabsTrigger value="users" className="gap-2">
+                    <TabsTrigger value="portal-users" className="gap-2">
+                        <Building2 className="h-4 w-4" />
+                        Portal Users
+                    </TabsTrigger>
+                    <TabsTrigger value="teams" className="gap-2">
                         <Users className="h-4 w-4" />
-                        Users
+                        Teams
                     </TabsTrigger>
                     <TabsTrigger value="roles" className="gap-2">
                         <Shield className="h-4 w-4" />
@@ -112,26 +178,17 @@ export default function AdminPage() {
                     </TabsTrigger>
                 </TabsList>
 
-                {/* Users Tab */}
-                <TabsContent value="users" className="mt-6 space-y-6">
+
+                {/* Portal Users Tab */}
+                <TabsContent value="portal-users" className="mt-6 space-y-6">
                     <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-4">
-                            <Input placeholder="Search users..." className="w-[300px]" />
-                            <Select defaultValue="all">
-                                <SelectTrigger className="w-[150px]">
-                                    <SelectValue placeholder="Role" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="all">All Roles</SelectItem>
-                                    <SelectItem value="super_admin">Super Admin</SelectItem>
-                                    <SelectItem value="ward_officer">Ward Officer</SelectItem>
-                                    <SelectItem value="dispatcher">Dispatcher</SelectItem>
-                                </SelectContent>
-                            </Select>
+                        <div>
+                            <h3 className="text-lg font-medium">Portal Users</h3>
+                            <p className="text-sm text-muted-foreground">Super Admins and Department HQ accounts</p>
                         </div>
-                        <Button>
+                        <Button onClick={() => setPortalUserModalOpen(true)}>
                             <UserPlus className="h-4 w-4 mr-2" />
-                            Add User
+                            Add Portal User
                         </Button>
                     </div>
 
@@ -140,20 +197,24 @@ export default function AdminPage() {
                             <Table>
                                 <TableHeader>
                                     <TableRow>
-                                        <TableHead>User</TableHead>
+                                        <TableHead>Name</TableHead>
                                         <TableHead>Role</TableHead>
-                                        <TableHead>Assignment</TableHead>
-                                        <TableHead>Status</TableHead>
-                                        <TableHead>Last Login</TableHead>
+                                        <TableHead>Department</TableHead>
                                         <TableHead></TableHead>
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
                                     {loading ? (
                                         <TableRow>
-                                            <TableCell colSpan={6} className="text-center h-24">Loading users...</TableCell>
+                                            <TableCell colSpan={4} className="text-center h-24">Loading portal users...</TableCell>
                                         </TableRow>
-                                    ) : users.map((user) => (
+                                    ) : portalUsers.length === 0 ? (
+                                        <TableRow key="empty">
+                                            <TableCell colSpan={4} className="text-center h-24 text-muted-foreground">
+                                                No portal users found. Click "Add Portal User" to create one.
+                                            </TableCell>
+                                        </TableRow>
+                                    ) : portalUsers.map((user) => (
                                         <TableRow key={user.id}>
                                             <TableCell>
                                                 <div className="flex items-center gap-3">
@@ -162,43 +223,31 @@ export default function AdminPage() {
                                                             {user.name?.split(" ").map(n => n[0]).join("") || "U"}
                                                         </AvatarFallback>
                                                     </Avatar>
-                                                    <div>
-                                                        <p className="font-medium">{user.name}</p>
-                                                        <p className="text-sm text-muted-foreground">{user.email}</p>
-                                                    </div>
+                                                    <span className="font-medium">{user.name}</span>
                                                 </div>
                                             </TableCell>
                                             <TableCell>
-                                                <Badge variant="outline" className="capitalize">
-                                                    {user.role?.replace(/_/g, " ") || "No Role"}
+                                                <Badge variant={user.role === 'super_admin' ? 'default' : 'outline'} className="capitalize">
+                                                    {user.role === 'super_admin' ? 'Super Admin' : 'Department HQ'}
                                                 </Badge>
                                             </TableCell>
                                             <TableCell className="text-muted-foreground">
-                                                {user.wardAssignment || user.department || "—"}
+                                                {user.department ? DEPARTMENT_LABELS[user.department as Department] : '—'}
                                             </TableCell>
                                             <TableCell>
-                                                <Badge
-                                                    variant={user.isActive ? "default" : "secondary"}
-                                                    className={user.isActive ? "bg-[var(--emerald-success)]" : ""}
+                                                <Button
+                                                    variant="ghost"
+                                                    size="icon"
+                                                    className="text-destructive hover:text-destructive"
+                                                    onClick={() => handleDeletePortalUser(user.id)}
+                                                    disabled={deletingId === user.id}
                                                 >
-                                                    {user.isActive ? "Active" : "Inactive"}
-                                                </Badge>
-                                            </TableCell>
-                                            <TableCell className="text-muted-foreground">
-                                                {user.lastLogin ? format(user.lastLogin, "MMM d, h:mm a") : "Never"}
-                                            </TableCell>
-                                            <TableCell>
-                                                <div className="flex items-center gap-1">
-                                                    <Button variant="ghost" size="icon">
-                                                        <Edit className="h-4 w-4" />
-                                                    </Button>
-                                                    <Button variant="ghost" size="icon">
-                                                        <Key className="h-4 w-4" />
-                                                    </Button>
-                                                    <Button variant="ghost" size="icon" className="text-destructive">
+                                                    {deletingId === user.id ? (
+                                                        <Loader2 className="h-4 w-4 animate-spin" />
+                                                    ) : (
                                                         <Trash2 className="h-4 w-4" />
-                                                    </Button>
-                                                </div>
+                                                    )}
+                                                </Button>
                                             </TableCell>
                                         </TableRow>
                                     ))}
@@ -206,6 +255,84 @@ export default function AdminPage() {
                             </Table>
                         </CardContent>
                     </Card>
+                </TabsContent>
+
+                {/* Teams Tab */}
+                <TabsContent value="teams" className="mt-6 space-y-6">
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-4">
+                            <Input placeholder="Search teams..." className="w-[300px]" />
+                            <Select defaultValue="all">
+                                <SelectTrigger className="w-[180px]">
+                                    <SelectValue placeholder="Department" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="all">All Departments</SelectItem>
+                                    {departments.map(([key, label]) => (
+                                        <SelectItem key={key} value={key}>
+                                            {label}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
+                        <Button onClick={() => setTeamModalOpen(true)}>
+                            <UserPlus className="h-4 w-4 mr-2" />
+                            Add Team
+                        </Button>
+                    </div>
+
+                    <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                        {teams.map((team) => (
+                            <Card key={team.id}>
+                                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                                    <CardTitle className="text-sm font-medium">
+                                        {team.name}
+                                    </CardTitle>
+                                    <div className="flex items-center gap-1">
+                                        <Badge variant={team.status === 'available' ? 'default' : 'secondary'} className={team.status === 'available' ? 'bg-[var(--emerald-success)]' : ''}>
+                                            {team.status}
+                                        </Badge>
+                                        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleEditTeam(team)}>
+                                            <Edit className="h-4 w-4" />
+                                        </Button>
+                                        <Button
+                                            variant="ghost"
+                                            size="icon"
+                                            className="h-8 w-8 text-destructive hover:text-destructive"
+                                            onClick={() => handleDeleteTeam(team.id)}
+                                            disabled={deletingId === team.id}
+                                        >
+                                            {deletingId === team.id ? (
+                                                <Loader2 className="h-4 w-4 animate-spin" />
+                                            ) : (
+                                                <Trash2 className="h-4 w-4" />
+                                            )}
+                                        </Button>
+                                    </div>
+                                </CardHeader>
+                                <CardContent>
+                                    <div className="text-2xl font-bold">{team.members?.length || 0} Members</div>
+                                    <p className="text-xs text-muted-foreground mt-1">
+                                        {team.department}
+                                    </p>
+                                    <div className="mt-4 space-y-2">
+                                        {(team.members || []).slice(0, 3).map((member: { id: string; name: string; role: string }) => (
+                                            <div key={member.id} className="flex items-center text-sm">
+                                                <div className="w-2 h-2 rounded-full bg-primary mr-2" />
+                                                {member.name} <span className="text-muted-foreground ml-1">({member.role})</span>
+                                            </div>
+                                        ))}
+                                        {(team.members?.length || 0) > 3 && (
+                                            <div className="text-xs text-muted-foreground pt-1">
+                                                +{team.members.length - 3} more members
+                                            </div>
+                                        )}
+                                    </div>
+                                </CardContent>
+                            </Card>
+                        ))}
+                    </div>
                 </TabsContent>
 
                 {/* Roles Tab */}
@@ -246,61 +373,30 @@ export default function AdminPage() {
                             <CardHeader>
                                 <CardTitle className="flex items-center gap-2 text-base">
                                     <Shield className="h-4 w-4 text-[var(--govt-blue)]" />
-                                    Ward Officer
+                                    Department HQ
                                 </CardTitle>
-                                <CardDescription>Ward-level management</CardDescription>
+                                <CardDescription>Department-level management</CardDescription>
                             </CardHeader>
                             <CardContent className="space-y-3">
                                 <div className="text-sm space-y-2">
                                     <div className="flex items-center gap-2">
                                         <span className="text-[var(--emerald-success)]">✓</span>
-                                        View assigned ward tickets
+                                        View department tickets
                                     </div>
                                     <div className="flex items-center gap-2">
                                         <span className="text-[var(--emerald-success)]">✓</span>
-                                        Update ticket status
-                                    </div>
-                                    <div className="flex items-center gap-2">
-                                        <span className="text-[var(--emerald-success)]">✓</span>
-                                        Add internal notes
-                                    </div>
-                                    <div className="flex items-center gap-2">
-                                        <span className="text-muted-foreground">✗</span>
-                                        <span className="text-muted-foreground">System configuration</span>
-                                    </div>
-                                </div>
-                                <p className="text-xs text-muted-foreground">3 users with this role</p>
-                            </CardContent>
-                        </Card>
-
-                        <Card>
-                            <CardHeader>
-                                <CardTitle className="flex items-center gap-2 text-base">
-                                    <Shield className="h-4 w-4 text-[var(--amber-warning)]" />
-                                    Dispatcher
-                                </CardTitle>
-                                <CardDescription>Team coordination</CardDescription>
-                            </CardHeader>
-                            <CardContent className="space-y-3">
-                                <div className="text-sm space-y-2">
-                                    <div className="flex items-center gap-2">
-                                        <span className="text-[var(--emerald-success)]">✓</span>
-                                        View all tickets
+                                        Manage department teams
                                     </div>
                                     <div className="flex items-center gap-2">
                                         <span className="text-[var(--emerald-success)]">✓</span>
                                         Assign teams to tickets
                                     </div>
                                     <div className="flex items-center gap-2">
-                                        <span className="text-[var(--emerald-success)]">✓</span>
-                                        Manage dispatch queue
-                                    </div>
-                                    <div className="flex items-center gap-2">
                                         <span className="text-muted-foreground">✗</span>
-                                        <span className="text-muted-foreground">Delete tickets</span>
+                                        <span className="text-muted-foreground">Cross-department access</span>
                                     </div>
                                 </div>
-                                <p className="text-xs text-muted-foreground">1 user with this role</p>
+                                <p className="text-xs text-muted-foreground">6 departments supported</p>
                             </CardContent>
                         </Card>
                     </div>
@@ -334,17 +430,35 @@ export default function AdminPage() {
                                     </Select>
                                 </div>
                                 <div className="space-y-2">
-                                    <Label>Database Management</Label>
+                                    <Label>Database Mode</Label>
                                     <div className="flex items-center gap-4">
+                                        <Badge variant="outline" className="bg-[var(--emerald-success)]/10 text-[var(--emerald-success)] border-[var(--emerald-success)]/20">
+                                            Production (Dynamic)
+                                        </Badge>
+                                        <p className="text-xs text-muted-foreground">System is running in dynamic production mode.</p>
+                                    </div>
+                                    <div className="pt-2">
                                         <Button
-                                            onClick={handleSeed}
-                                            disabled={isSeeding}
-                                            variant="outline"
-                                            className="w-full sm:w-auto"
+                                            variant="destructive"
+                                            size="sm"
+                                            onClick={handleClearData}
+                                            disabled={clearingData}
                                         >
-                                            {isSeeding ? "Seeding..." : "Seed Database"}
+                                            {clearingData ? (
+                                                <>
+                                                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                                    Clearing...
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <Trash2 className="h-4 w-4 mr-2" />
+                                                    Clear All Seeded Data
+                                                </>
+                                            )}
                                         </Button>
-                                        <p className="text-xs text-muted-foreground">Reset database to initial demo state</p>
+                                        <p className="text-xs text-muted-foreground mt-1">
+                                            Removes all tickets, teams, users, and analytics from Firebase.
+                                        </p>
                                     </div>
                                 </div>
                                 <div className="space-y-2">
@@ -495,7 +609,24 @@ export default function AdminPage() {
                         </CardContent>
                     </Card>
                 </TabsContent >
-            </Tabs >
-        </div >
+            </Tabs>
+
+            <AddTeamModal
+                open={teamModalOpen}
+                onOpenChange={setTeamModalOpen}
+                onSuccess={loadData}
+            />
+            <AddPortalUserModal
+                open={portalUserModalOpen}
+                onOpenChange={setPortalUserModalOpen}
+                onSuccess={loadData}
+            />
+            <EditTeamModal
+                open={editTeamModalOpen}
+                onOpenChange={setEditTeamModalOpen}
+                team={selectedTeam}
+                onSuccess={loadData}
+            />
+        </div>
     );
 }

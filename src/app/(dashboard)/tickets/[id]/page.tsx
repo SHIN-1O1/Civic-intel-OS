@@ -95,7 +95,9 @@ export default function TicketDetailPage() {
             const newNote = {
                 id: crypto.randomUUID(),
                 timestamp: new Date(),
-                author: "Current User",
+                // TODO: Replace with actual authenticated user's display name from auth context
+                // Example: author: session?.user?.name || session?.user?.email || "Unknown User"
+                author: "Admin User",
                 content: noteContent
             };
 
@@ -195,9 +197,10 @@ export default function TicketDetailPage() {
     };
 
     const handlePlayAudio = () => {
-        setIsPlaying(!isPlaying);
+        const newIsPlaying = !isPlaying;
+        setIsPlaying(newIsPlaying);
         // TODO: Implement actual audio playback
-        console.log(isPlaying ? "Paused audio" : "Playing audio");
+        console.log(newIsPlaying ? "Playing audio" : "Paused audio");
     };
 
     if (loading) return <div className="p-8 text-center">Loading ticket details...</div>;
@@ -552,17 +555,25 @@ export default function TicketDetailPage() {
                                 ticket.slaStage === "at_risk" && "bg-[var(--amber-warning)]/10 border border-[var(--amber-warning)]",
                                 ticket.slaStage === "on_track" && "bg-[var(--emerald-success)]/10 border border-[var(--emerald-success)]"
                             )}>
-                                <div className={cn(
-                                    "text-2xl font-bold font-mono",
-                                    ticket.slaStage === "breached" && "text-[var(--signal-red)]",
-                                    ticket.slaStage === "at_risk" && "text-[var(--amber-warning)]",
-                                    ticket.slaStage === "on_track" && "text-[var(--emerald-success)]"
-                                )}>
-                                    {formatDistanceToNow(ticket.slaDeadline)}
-                                </div>
-                                <div className="text-xs text-muted-foreground mt-1">
-                                    {new Date() > ticket.slaDeadline ? "Overdue" : "Until deadline"}
-                                </div>
+                                {(() => {
+                                    const slaDeadline = new Date(ticket.slaDeadline);
+                                    const isOverdue = new Date() > slaDeadline;
+                                    return (
+                                        <>
+                                            <div className={cn(
+                                                "text-2xl font-bold font-mono",
+                                                ticket.slaStage === "breached" && "text-[var(--signal-red)]",
+                                                ticket.slaStage === "at_risk" && "text-[var(--amber-warning)]",
+                                                ticket.slaStage === "on_track" && "text-[var(--emerald-success)]"
+                                            )}>
+                                                {formatDistanceToNow(slaDeadline, { addSuffix: true })}
+                                            </div>
+                                            <div className="text-xs text-muted-foreground mt-1">
+                                                {isOverdue ? "Overdue" : "Until deadline"}
+                                            </div>
+                                        </>
+                                    );
+                                })()}
                             </div>
                         </div>
 

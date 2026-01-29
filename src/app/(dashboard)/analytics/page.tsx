@@ -31,6 +31,26 @@ import {
 import { api } from "@/services/api";
 import { Ticket, WardStats, KPIData } from "@/lib/types";
 
+// Helper to escape HTML special characters (prevents XSS)
+const escapeHtml = (unsafe: string | number): string => {
+    return String(unsafe)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+};
+
+// Helper to escape CSV values (prevents CSV injection)
+const escapeCSV = (value: string | number): string => {
+    const str = String(value);
+    // Escape formula injection and wrap in quotes if contains special chars
+    if (/^[=+\-@\t\r]/.test(str) || /[",\n\r]/.test(str)) {
+        return `"${str.replace(/"/g, '""')}"`;
+    }
+    return str;
+};
+
 export default function AnalyticsPage() {
     const [tickets, setTickets] = React.useState<Ticket[]>([]);
     const [wardStats, setWardStats] = React.useState<WardStats[]>([]);
@@ -138,18 +158,18 @@ export default function AnalyticsPage() {
                 </div>
                 <div className="flex gap-2">
                     <Button variant="outline" onClick={() => {
-                        // Export CSV
+                        // Export CSV with proper escaping
                         const csvData = [
                             ['Metric', 'Value'],
-                            ['Total Tickets', tickets.length],
-                            ['Total Resolved', totalResolved],
-                            ['Avg Resolution Time (hours)', avgResolutionTime],
-                            ['SLA Compliance (%)', slaCompliance],
-                            ['Critical Load', kpiData?.criticalLoad || 0],
-                            ['SLA Breaches', kpiData?.slaBreaches || 0],
+                            ['Total Tickets', escapeCSV(tickets.length)],
+                            ['Total Resolved', escapeCSV(totalResolved)],
+                            ['Avg Resolution Time (hours)', escapeCSV(avgResolutionTime)],
+                            ['SLA Compliance (%)', escapeCSV(slaCompliance)],
+                            ['Critical Load', escapeCSV(kpiData?.criticalLoad || 0)],
+                            ['SLA Breaches', escapeCSV(kpiData?.slaBreaches || 0)],
                             ['', ''],
                             ['Ward', 'Total Issues', 'Resolved', 'SLA %'],
-                            ...wardStats.map(w => [w.wardName, w.totalIssues, w.resolvedIssues, w.slaComplianceRate])
+                            ...wardStats.map(w => [escapeCSV(w.wardName), escapeCSV(w.totalIssues), escapeCSV(w.resolvedIssues), escapeCSV(w.slaComplianceRate)])
                         ];
                         const csv = csvData.map(row => row.join(',')).join('\n');
                         const blob = new Blob([csv], { type: 'text/csv' });
@@ -164,13 +184,13 @@ export default function AnalyticsPage() {
                         Export CSV
                     </Button>
                     <Button onClick={() => {
-                        // Generate PDF-like report (HTML print dialog)
+                        // Generate PDF-like report (HTML print dialog) with XSS protection
                         const reportWindow = window.open('', '_blank');
                         if (reportWindow) {
                             reportWindow.document.write(`
                                 <html>
                                 <head>
-                                    <title>Monthly Analytics Report - ${new Date().toLocaleDateString()}</title>
+                                    <title>Monthly Analytics Report - ${escapeHtml(new Date().toLocaleDateString())}</title>
                                     <style>
                                         body { font-family: Arial, sans-serif; padding: 20px; }
                                         h1 { color: #333; border-bottom: 2px solid #4f46e5; padding-bottom: 10px; }
@@ -183,20 +203,20 @@ export default function AnalyticsPage() {
                                 </head>
                                 <body>
                                     <h1>Civic Intelligence OS - Monthly Analytics Report</h1>
-                                    <p>Generated: ${new Date().toLocaleString()}</p>
+                                    <p>Generated: ${escapeHtml(new Date().toLocaleString())}</p>
                                     
                                     <h2>Key Performance Indicators</h2>
                                     <div class="metric">
-                                        <strong>Total Tickets:</strong> <span class="metric-value">${tickets.length}</span>
+                                        <strong>Total Tickets:</strong> <span class="metric-value">${escapeHtml(tickets.length)}</span>
                                     </div>
                                     <div class="metric">
-                                        <strong>Total Resolved:</strong> <span class="metric-value">${totalResolved}</span>
+                                        <strong>Total Resolved:</strong> <span class="metric-value">${escapeHtml(totalResolved)}</span>
                                     </div>
                                     <div class="metric">
-                                        <strong>Average Resolution Time:</strong> <span class="metric-value">${avgResolutionTime}h</span>
+                                        <strong>Average Resolution Time:</strong> <span class="metric-value">${escapeHtml(avgResolutionTime)}h</span>
                                     </div>
                                     <div class="metric">
-                                        <strong>SLA Compliance:</strong> <span class="metric-value">${slaCompliance}%</span>
+                                        <strong>SLA Compliance:</strong> <span class="metric-value">${escapeHtml(slaCompliance)}%</span>
                                     </div>
                                     
                                     <h2>Ward Performance</h2>
@@ -210,11 +230,11 @@ export default function AnalyticsPage() {
                                         </tr>
                                         ${wardStats.map(w => `
                                             <tr>
-                                                <td>${w.wardName}</td>
-                                                <td>${w.totalIssues}</td>
-                                                <td>${w.resolvedIssues}</td>
-                                                <td>${w.avgResolutionTime}</td>
-                                                <td>${w.slaComplianceRate}%</td>
+                                                <td>${escapeHtml(w.wardName)}</td>
+                                                <td>${escapeHtml(w.totalIssues)}</td>
+                                                <td>${escapeHtml(w.resolvedIssues)}</td>
+                                                <td>${escapeHtml(w.avgResolutionTime)}</td>
+                                                <td>${escapeHtml(w.slaComplianceRate)}%</td>
                                             </tr>
                                         `).join('')}
                                     </table>

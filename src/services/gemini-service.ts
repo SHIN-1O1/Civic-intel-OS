@@ -37,7 +37,7 @@ export class GeminiService {
                     type: ticket.type,
                     category: ticket.category,
                     description: ticket.description,
-                    address: ticket.location.address,
+                    address: ticket.location?.address ?? '',
                 }),
             });
 

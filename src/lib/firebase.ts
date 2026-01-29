@@ -18,10 +18,12 @@ const db = getFirestore(app);
 const auth = getAuth(app);
 const storage = getStorage(app);
 
-// Set auth persistence to local (survives browser restarts)
-setPersistence(auth, browserLocalPersistence).catch((error) => {
-  console.error('[Firebase] Failed to set auth persistence:', error);
-});
+// Set auth persistence to local (only in browser)
+if (typeof window !== "undefined") {
+  setPersistence(auth, browserLocalPersistence).catch((error) => {
+    console.error('[Firebase] Failed to set auth persistence:', error);
+  });
+}
 
 export { app, db, auth, storage };
 

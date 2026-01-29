@@ -10,6 +10,8 @@ const UpdateTeamSchema = z.object({
     capacity: z.object({
         current: z.number().min(0).max(100),
         max: z.number().min(1).max(100),
+    }).refine((data) => data.current <= data.max, {
+        message: "Current capacity cannot exceed max capacity",
     }).optional(),
 });
 

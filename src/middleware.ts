@@ -41,31 +41,13 @@ export function middleware(request: NextRequest) {
         return NextResponse.redirect(new URL('/portal-select', request.url));
     }
 
-    // Check if it's a public route
-    const isPublicRoute = publicRoutes.some(route =>
-        pathname === route || pathname.startsWith(route + '/')
-    );
+    // NOTE: We've removed the cookie-based auth check from middleware because:
+    // 1. Firebase client SDK doesn't automatically set cookies
+    // 2. This was causing an infinite redirect loop between / and /portal-select
+    // 3. Client-side auth in auth-context.tsx handles protected route logic
+    // 4. API routes use Firebase Admin SDK for server-side verification
 
-    if (isPublicRoute) {
-        return NextResponse.next();
-    }
-
-    // SECURITY NOTE: This middleware provides basic session cookie check.
-    // Full token verification happens server-side in API routes using Firebase Admin SDK.
-    // The client-side Firebase SDK handles actual authentication state.
-    // For protected routes, check for auth session cookie
-    const authSession = request.cookies.get('__session') || request.cookies.get('firebase-auth-token');
-
-    // If no auth cookie found, redirect to portal-select
-    // The actual auth validation happens on client-side with Firebase
-    // and server-side in API routes with Firebase Admin SDK
-    if (!authSession) {
-        const url = request.nextUrl.clone();
-        url.pathname = '/portal-select';
-        url.searchParams.set('redirect', pathname);
-        return NextResponse.redirect(url);
-    }
-
+    // Let all other routes through - client-side auth will handle redirects
     return NextResponse.next();
 }
 

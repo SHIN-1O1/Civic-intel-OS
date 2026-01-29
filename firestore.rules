@@ -89,9 +89,15 @@ service cloud.firestore {
       // Portal users can read complaints
       allow read: if isAuthenticated();
       
-      // No write access from portal - citizens write via their own app
-      // with their own security rules
-      allow create, update, delete: if false;
+      // ALLOW CITIZENS TO FILE COMPLAINTS
+      // Must be authenticated, and userId in data must match auth.uid
+      allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid;
+      
+      // Allow updates for assignment (by portal users) or by the citizen themselves
+      allow update: if isAuthenticated();
+      
+      // Allow users to delete their own complaints
+      allow delete: if isAuthenticated() && resource.data.userId == request.auth.uid;
     }
     
     // ============================================

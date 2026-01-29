@@ -64,7 +64,7 @@ export function ActionStream({ urgentTickets, systemFeed }: ActionStreamProps) {
                                                     </Badge>
                                                 </div>
                                                 <p className="text-xs text-muted-foreground truncate mt-0.5">
-                                                    {ticket.location.ward}
+                                                    {ticket.location?.ward ?? "Unknown location"}
                                                 </p>
                                                 <div className="flex items-center gap-2 mt-1">
                                                     <Clock className="h-3 w-3 text-muted-foreground" />

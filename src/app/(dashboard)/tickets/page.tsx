@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { api } from "@/services/api";
 import { Ticket } from "@/lib/types";
+import { toast } from "sonner";
 
 export default function TicketsPage() {
     const [tickets, setTickets] = React.useState<Ticket[]>([]);
@@ -51,6 +52,54 @@ export default function TicketsPage() {
         }
     };
 
+    const handleExportCSV = (ticketsToExport: Ticket[]) => {
+        if (ticketsToExport.length === 0) {
+            toast.error("No tickets to export");
+            return;
+        }
+
+        // CSV headers
+        const headers = [
+            "ID", "Type", "Category", "Status", "Priority", "Priority Score",
+            "Location", "Ward", "Assigned Team", "SLA Deadline", "Created At", "Description"
+        ];
+
+        // Convert tickets to CSV rows
+        const rows = ticketsToExport.map(ticket => [
+            ticket.id,
+            ticket.type || "",
+            ticket.category || "",
+            ticket.status || "",
+            ticket.priority || "",
+            ticket.priorityScore?.toString() || "",
+            ticket.location?.address || "",
+            ticket.location?.ward || "",
+            ticket.assignedTeam || "Unassigned",
+            ticket.slaDeadline ? new Date(ticket.slaDeadline).toISOString() : "",
+            ticket.createdAt ? new Date(ticket.createdAt).toISOString() : "",
+            `"${(ticket.description || "").replace(/"/g, '""')}"` // Escape quotes
+        ]);
+
+        // Build CSV content
+        const csvContent = [
+            headers.join(","),
+            ...rows.map(row => row.join(","))
+        ].join("\n");
+
+        // Create and download file
+        const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = `tickets_export_${new Date().toISOString().split('T')[0]}.csv`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+
+        toast.success(`Exported ${ticketsToExport.length} tickets`);
+    };
+
     return (
         <div className="space-y-6">
             {/* Page Header */}
@@ -65,7 +114,7 @@ export default function TicketsPage() {
                     <Button variant="outline" size="icon" onClick={loadTickets} disabled={loading}>
                         <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
                     </Button>
-                    <Button variant="outline">
+                    <Button variant="outline" onClick={() => handleExportCSV(tickets)}>
                         <Download className="h-4 w-4 mr-2" />
                         Export CSV
                     </Button>
@@ -97,7 +146,11 @@ export default function TicketsPage() {
                             <UserPlus className="h-4 w-4 mr-2" />
                             Batch Assign
                         </Button>
-                        <Button variant="outline" size="sm">
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleExportCSV(tickets.filter(t => selectedTickets.includes(t.id)))}
+                        >
                             <Download className="h-4 w-4 mr-2" />
                             Export Selected
                         </Button>

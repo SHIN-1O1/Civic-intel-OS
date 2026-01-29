@@ -4,7 +4,7 @@ export type TicketStatus = 'open' | 'assigned' | 'in_progress' | 'on_site' | 're
 export type TicketPriority = 'low' | 'medium' | 'high' | 'critical';
 export type SLAStage = 'on_track' | 'at_risk' | 'breached';
 export type TeamStatus = 'available' | 'busy' | 'offline';
-export type UserRole = 'super_admin' | 'ward_officer' | 'dispatcher' | 'field_team';
+export type UserRole = 'super_admin' | 'department_hq';
 
 // Department Portal System
 export type Department =
@@ -22,6 +22,26 @@ export interface PortalUser {
     name: string;
     role: PortalRole;
     department?: Department;
+}
+
+// Input type for creating new portal users
+export interface CreatePortalUserInput {
+    name: string;
+    email: string;
+    password: string;
+    role: PortalRole;
+    department?: Department;
+}
+
+// System configuration for dynamic settings
+export interface SystemConfig {
+    departments: DepartmentConfig[];
+}
+
+export interface DepartmentConfig {
+    key: Department;
+    label: string;
+    isActive: boolean;
 }
 
 // Department display names and mappings

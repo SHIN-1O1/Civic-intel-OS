@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CivicConnect - Grievance Portal</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Google Icons -->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+    <!-- Leaflet Config -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <script type="module" src="firebase-config.js" defer></script>
+    <script type="module" src="script.js" defer></script>
+</head>
+
+<body>
+
+    <!-- Navigation Bar (Visible only after login) -->
+    <nav class="navbar" id="main-nav" style="display: none;">
+        <div class="container nav-container">
+            <div class="logo">
+                <span class="material-icons-round logo-icon">public</span>
+                Civic-Intel-OS
+            </div>
+            <ul class="nav-links">
+                <li><a href="#" class="nav-link active" data-target="home-section">Home</a></li>
+                <li><a href="#" class="nav-link" data-target="history-section">History</a></li>
+            </ul>
+            <div class="user-menu" id="user-menu-btn">
+                <div class="avatar" id="nav-avatar">U</div>
+                <!-- Dropdown -->
+                <div class="dropdown-menu">
+                    <button id="profile-btn"><span class="material-icons-round">person</span> Profile</button>
+                    <button id="logout-btn"><span class="material-icons-round">logout</span> Logout</button>
+                </div>
+            </div>
+            <!-- Mobile Menu Toggle -->
+            <button class="menu-toggle"><span class="material-icons-round">menu</span></button>
+        </div>
+    </nav>
+
+    <!-- Main Container -->
+    <main class="main-container">
+
+        <!-- LOGIN SECTION -->
+        <section id="login-section" class="active-section">
+            <div class="auth-container">
+                <div class="auth-card">
+                    <div class="auth-header">
+                        <h1>Welcome Back</h1>
+                        <p>Login to report and track grievances</p>
+                    </div>
+                    <form id="login-form">
+                        <div class="form-group">
+                            <label>Username</label>
+                            <div class="input-wrapper">
+                                <span class="material-icons-round">person</span>
+                                <input type="text" id="login-username" placeholder="Enter your username" value="demo"
+                                    required>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Password</label>
+                            <div class="input-wrapper">
+                                <span class="material-icons-round">lock</span>
+                                <input type="password" id="login-password" placeholder="Enter password" value="demo"
+                                    required>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-block">Login</button>
+                        <div class="auth-footer">
+                            <p>Don't have an account? <a href="#" id="go-to-signup">Sign Up</a></p>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </section>
+
+        <!-- SIGNUP SECTION -->
+        <section id="signup-section">
+            <div class="auth-container">
+                <div class="auth-card">
+                    <div class="auth-header">
+                        <h1>Create Account</h1>
+                        <p>Join to make your city better</p>
+                    </div>
+                    <form id="signup-form">
+                        <div class="form-group">
+                            <label>Username</label>
+                            <div class="input-wrapper">
+                                <span class="material-icons-round">person</span>
+                                <input type="text" id="signup-username" required>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Phone Number</label>
+                                <div class="input-wrapper">
+                                    <span class="material-icons-round">phone</span>
+                                    <input type="tel" id="signup-phone" required pattern="[0-9]{10}">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>Aadhar Number</label>
+                                <div class="input-wrapper">
+                                    <span class="material-icons-round">badge</span>
+                                    <input type="text" id="signup-aadhar" required pattern="[0-9]{12}">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Address</label>
+                            <div class="input-wrapper">
+                                <span class="material-icons-round">home</span>
+                                <textarea id="signup-address" rows="2" required></textarea>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Password</label>
+                            <div class="input-wrapper">
+                                <span class="material-icons-round">lock</span>
+                                <input type="password" id="signup-password" required>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-block">Sign Up</button>
+                        <div class="auth-footer">
+                            <p>Already have an account? <a href="#" id="go-to-login">Login</a></p>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </section>
+
+        <!-- HOME SECTION (Dashboard) -->
+        <section id="home-section">
+            <div class="container">
+                <header class="section-header">
+                    <h2>Report a Grievance</h2>
+                    <p>Select a category to view details and file a complaint</p>
+                </header>
+
+                <div class="categories-grid">
+                    <!-- Category Cards -->
+                    <div class="category-card" data-category="Road Issues">
+                        <div class="card-icon road-icon">
+                            <span class="material-icons-round">add_road</span>
+                        </div>
+                        <h3>Road Issues</h3>
+                        <p class="category-desc">Potholes, Damaged Roads, Street Lights</p>
+                        <div class="category-details">
+                            <h4>Required Details:</h4>
+                            <ul>
+                                <li>Exact Location / Landmark</li>
+                                <li>Photo of the damage</li>
+                                <li>Severity assessment</li>
+                            </ul>
+                            <button class="btn btn-primary btn-sm mt-2 start-complaint-btn" data-cat="Road Issues">File
+                                Complaint</button>
+                        </div>
+                    </div>
+
+                    <div class="category-card" data-category="Police Complaints">
+                        <div class="card-icon police-icon">
+                            <span class="material-icons-round">local_police</span>
+                        </div>
+                        <h3>Police Complaints</h3>
+                        <p class="category-desc">Theft, Misconduct, Public Disturbance</p>
+                        <div class="category-details">
+                            <h4>Required Details:</h4>
+                            <ul>
+                                <li>Incident Date & Time</li>
+                                <li>Witness details (if any)</li>
+                                <li>Evidence (Audio/Video/Photo)</li>
+                            </ul>
+                            <button class="btn btn-primary btn-sm mt-2 start-complaint-btn"
+                                data-cat="Police Complaints">File Complaint</button>
+                        </div>
+                    </div>
+
+                    <div class="category-card" data-category="Sanitation">
+                        <div class="card-icon sanitation-icon">
+                            <span class="material-icons-round">cleaning_services</span>
+                        </div>
+                        <h3>Sanitation</h3>
+                        <p class="category-desc">Garbage Collection, Drainage, Cleaning</p>
+                        <div class="category-details">
+                            <h4>Required Details:</h4>
+                            <ul>
+                                <li>Location of dump</li>
+                                <li>Days since last cleaned</li>
+                                <li>Health hazard level</li>
+                            </ul>
+                            <button class="btn btn-primary btn-sm mt-2 start-complaint-btn" data-cat="Sanitation">File
+                                Complaint</button>
+                        </div>
+                    </div>
+
+                    <div class="category-card" data-category="Water Supply">
+                        <div class="card-icon water-icon">
+                            <span class="material-icons-round">water_drop</span>
+                        </div>
+                        <h3>Water Supply</h3>
+                        <p class="category-desc">Shortage, Contamination, Leakage</p>
+                        <div class="category-details">
+                            <h4>Required Details:</h4>
+                            <ul>
+                                <li>Customer ID / Meter No</li>
+                                <li>Duration of issue</li>
+                                <li>Type of contamination</li>
+                            </ul>
+                            <button class="btn btn-primary btn-sm mt-2 start-complaint-btn" data-cat="Water Supply">File
+                                Complaint</button>
+                        </div>
+                    </div>
+
+                    <div class="category-card" data-category="Electricity">
+                        <div class="card-icon electric-icon">
+                            <span class="material-icons-round">electric_bolt</span>
+                        </div>
+                        <h3>Electricity</h3>
+                        <p class="category-desc">Power Cuts, Faulty Meters, Wires</p>
+                        <div class="category-details">
+                            <h4>Required Details:</h4>
+                            <ul>
+                                <li>Consumer Number</li>
+                                <li>Pole Number (if applicable)</li>
+                                <li>Issue description</li>
+                            </ul>
+                            <button class="btn btn-primary btn-sm mt-2 start-complaint-btn" data-cat="Electricity">File
+                                Complaint</button>
+                        </div>
+                    </div>
+
+                    <div class="category-card" data-category="Healthcare">
+                        <div class="card-icon health-icon">
+                            <span class="material-icons-round">medical_services</span>
+                        </div>
+                        <h3>Healthcare</h3>
+                        <p class="category-desc">Hospital Issues, Ambulance, Camps</p>
+                        <div class="category-details">
+                            <h4>Required Details:</h4>
+                            <ul>
+                                <li>Hospital Name</li>
+                                <li>Patient details</li>
+                                <li>Nature of negligence/issue</li>
+                            </ul>
+                            <button class="btn btn-primary btn-sm mt-2 start-complaint-btn" data-cat="Healthcare">File
+                                Complaint</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- COMPLAINT SUBMISSION SECTION -->
+        <section id="submission-section">
+            <div class="container">
+                <div class="chat-interface-container">
+                    <div class="chat-header">
+                        <button class="btn-icon back-to-home"><span
+                                class="material-icons-round">arrow_back</span></button>
+                        <div class="chat-title">
+                            <h3>New Complaint</h3>
+                            <span id="selected-category-badge" class="badge">Category</span>
+                        </div>
+                    </div>
+
+                    <div class="chat-area" id="chat-messages">
+                        <!-- Bot Message -->
+                        <div class="message bot-message">
+                            <div class="message-avatar"><span class="material-icons-round">smart_toy</span></div>
+                            <div class="message-content">
+                                <p>Hello! I'm here to help you file a complaint regarding <strong
+                                        id="chat-cat_name">...</strong>. Please describe the issue in detail and upload
+                                    a clear photo if possible.</p>
+                                <span class="message-time">Just now</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="chat-input-area">
+                        <div class="image-preview" id="image-preview-container" style="display: none;">
+                            <img id="preview-img" src="" alt="Preview">
+                            <button id="remove-img-btn"><span class="material-icons-round">close</span></button>
+                        </div>
+                        <form id="complaint-form">
+                            <label for="file-upload" class="btn-icon file-btn">
+                                <span class="material-icons-round">add_photo_alternate</span>
+                            </label>
+                            <input type="file" id="file-upload" accept="image/*" hidden>
+
+                            <textarea id="complaint-text" placeholder="Type your complaint details here..." rows="1"
+                                required></textarea>
+
+                            <button type="submit" class="btn-icon send-btn">
+                                <span class="material-icons-round">send</span>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="history-section">
+            <div class="container">
+                <header class="section-header">
+                    <h2>Complaint History</h2>
+                    <p>Track the status of your submitted grievances</p>
+                </header>
+
+                <div class="history-list" id="complaints-list">
+                    <!-- JS will populate this -->
+                    <div class="empty-state">
+                        <span class="material-icons-round">history</span>
+                        <p>No complaints found yet.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Complaint Details Modal -->
+        <div id="complaint-modal" class="modal">
+            <div class="modal-content">
+                <span class="close-modal">&times;</span>
+                <div class="modal-header">
+                    <h3 id="modal-category">Category</h3>
+                    <span id="modal-status" class="status-badge">Pending</span>
+                </div>
+                <div class="modal-body">
+                    <p><strong>Date:</strong> <span id="modal-date"></span></p>
+                    <div class="detail-group">
+                        <label>Description</label>
+                        <p id="modal-desc">...</p>
+                    </div>
+                    <div class="detail-group">
+                        <label>Department Updates</label>
+                        <p id="modal-update">No updates yet.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Map Picker Modal -->
+        <div id="map-modal" class="modal">
+            <div class="modal-content" style="max-width: 600px; height: 500px; display: flex; flex-direction: column;">
+                <div class="modal-header">
+                    <h3>Pick Location</h3>
+                    <span class="close-modal close-map-modal">&times;</span>
+                </div>
+                <div id="map-container"
+                    style="flex: 1; min-height: 300px; border-radius: 8px; margin-bottom: 10px; z-index: 1;"></div>
+                <div style="text-align: center;">
+                    <p id="selected-address"
+                        style="font-size: 0.9em; color: var(--text-secondary); margin-bottom: 10px;">Click on map to
+                        select a location</p>
+                    <button id="confirm-location-btn" class="btn btn-primary" disabled>Confirm Location</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- PROFILE SECTION -->
+        <section id="profile-section">
+            <div class="container">
+                <div class="profile-card">
+                    <div class="profile-header">
+                        <div class="profile-avatar-large">U</div>
+                        <div class="profile-title">
+                            <h2 id="profile-name-display">Username</h2>
+                            <span class="badge badge-verified">Citizen</span>
+                        </div>
+                        <button id="edit-profile-btn" class="btn btn-secondary btn-sm">
+                            <span class="material-icons-round">edit</span> Edit Profile
+                        </button>
+                    </div>
+
+                    <div class="profile-body">
+                        <form id="profile-form">
+                            <div class="grid-2">
+                                <div class="form-group">
+                                    <label>Full Name</label>
+                                    <input type="text" id="profile-username" class="profile-input" disabled>
+                                </div>
+                                <div class="form-group">
+                                    <label>Phone Number</label>
+                                    <input type="tel" id="profile-phone" class="profile-input" disabled>
+                                </div>
+                                <div class="form-group">
+                                    <label>Aadhar Number</label>
+                                    <input type="text" id="profile-aadhar" class="profile-input" disabled>
+                                </div>
+                                <div class="form-group">
+                                    <label>Address</label>
+                                    <textarea id="profile-address" class="profile-input" disabled></textarea>
+                                </div>
+                            </div>
+                            <div class="profile-actions" id="profile-save-actions" style="display: none;">
+                                <button type="button" id="cancel-edit-btn" class="btn btn-secondary">Cancel</button>
+                                <button type="submit" class="btn btn-success">Save Changes</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <div id="toast-container"></div>
+
+    <script type="module" src="script.js"></script>
+</body>
+
+</html>
