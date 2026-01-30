@@ -1,128 +1,98 @@
 <div align="center">
   <h1>Civic Intelligence OS</h1>
-  <h3>The Future of Urban Governance & City Management</h3>
+  <h3>The Future of Urban Governance & Citizen Engagement</h3>
   
   <p>
     <img src="https://img.shields.io/badge/Next.js-16.1-black?style=for-the-badge&logo=next.js" alt="Next.js" />
     <img src="https://img.shields.io/badge/Firebase-Auth%20%26%20Firestore-flame?style=for-the-badge&logo=firebase" alt="Firebase" />
     <img src="https://img.shields.io/badge/Google_Gemini-Pro-4285F4?style=for-the-badge&logo=google-bard" alt="Gemini AI" />
+    <img src="https://img.shields.io/badge/Leaflet-Maps-green?style=for-the-badge&logo=leaflet" alt="Leaflet" />
     <img src="https://img.shields.io/badge/Tailwind_CSS-4.0-38B2AC?style=for-the-badge&logo=tailwind-css" alt="Tailwind CSS" />
   </p>
 
   <p>
-    <strong>Civic-intel-OS</strong> is a government-grade administrative dashboard designed to streamline city operations. 
-    It leverages the power of the <strong>Google Cloud Ecosystem</strong> to deliver real-time automated assessment, intelligent workforce dispatching, and secure multi-departmental coordination.
+    <strong>Civic Intelligence OS</strong> is a comprehensive ecosystem connecting citizens directly to city administration.
+    It combines a citizen-facing <strong>Grievance Portal</strong> for smart complaint filing with a government-grade <strong>Administrative Dashboard</strong> for real-time dispatch and management.
   </p>
 </div>
 
 <hr />
 
-## 🚀 Key Features
+## 🌍 The Ecosystem
+
+The platform consists of two powerful, interconnected applications working in sync:
 
 <table>
   <tr>
-    <td width="50%">
-      <h3 align="center">🏛️ Unified Command Center</h3>
+    <td width="50%" valign="top">
+      <h3 align="center">📱 Civic Connect (Citizen Portal)</h3>
+      <p align="center"><em>"Empowering citizens to report instantly."</em></p>
       <ul>
-        <li><strong>Dynamic Dispatch Map</strong>: Real-time tracking of field teams with live status (Available, Busy, Offline).</li>
-        <li><strong>Smart Auto-Assign</strong>: Algorithm matching tickets to departments and teams with the lowest workload.</li>
-        <li><strong>Priority Scoring</strong>: AI-driven assessment ensuring critical issues (Roads, Water) are addressed first.</li>
+        <li><strong>Smart Chatbot Filing</strong>: AI-guided interface that interviews citizens to capture precise complaint details.</li>
+        <li><strong>Interactive Map Picker</strong>: Pinpoint exact locations using OpenStreetMap & Leaflet integration.</li>
+        <li><strong>Real-Time Updates</strong>: Track status changes from "Pending" to "Resolved" instantly.</li>
+        <li><strong>Profile Management</strong>: Store citizen details for one-click reporting.</li>
       </ul>
     </td>
-    <td width="50%">
-      <h3 align="center">🛡️ Role-Based Access (RBAC)</h3>
+    <td width="50%" valign="top">
+      <h3 align="center">🏛️ Civic Intel OS (Admin HQ)</h3>
+      <p align="center"><em>"Streamlining city operations & dispatch."</em></p>
       <ul>
-        <li><strong>Super Admin</strong>: Global oversight, system settings, and audit logs.</li>
-        <li><strong>Department HQ</strong>: Dedicated portals for 6 key departments (Roads, Sanitation, Electrical, etc.).</li>
-        <li><strong>Team Management</strong>: HQ-managed rosters and shift capacities.</li>
+        <li><strong>Unified Command Center</strong>: Live dispatch map tracking field teams.</li>
+        <li><strong>Smart Auto-Assign</strong>: Algorithms match tickets to the nearest available team.</li>
+        <li><strong>Priority Scoring</strong>: AI assessment of severity (e.g., Live Wire = Critical).</li>
+        <li><strong>Role-Based Access</strong>: Dedicated portals for Roads, Sanitation, Police, etc.</li>
       </ul>
     </td>
   </tr>
 </table>
 
+---
+
 ## ⚡ Powered by Google Cloud & AI
 
-This platform is built on a robust foundation of Google technologies to ensure scalability, security, and intelligence.
-
-### 🔥 Firebase Ecosystem
-The backbone of our secure, real-time infrastructure.
-
-| Service | Usage & Implementation |
-|:---|:---|
-| **Firebase Authentication** | **Identity Platform**: Handles secure login for Admins, HQs, and Field Teams. <br> **Custom Claims**: Usage of custom claims to strictly enforce our RBAC (Role-Based Access Control) system, distinguishing between `super_admin` and `department_hq`. |
-| **Cloud Firestore** | **NoSQL Database**: Stores tickets, user profiles, and audit logs with millisecond latency. <br> **Real-time Listeners**: Powers the "Live Dispatch Map" and dashboard counters, pushing updates instantly to all connected clients without page reloads. <br> **Security Rules**: Complex `firestore.rules` ensure that Department HQs only access data relevant to their specific jurisdiction. |
+Our infrastructure leverages the full power of the Google Cloud ecosystem for security, scale, and intelligence.
 
 ### 🤖 Google Gemini AI Integration
-We utilize **Gemini Pro** via the Generative AI SDK to transform raw citizen reports into actionable data.
+We utilize **Gemini Pro & Flash-Lite** to power the intelligence across both apps:
 
--   **Intelligent Triage**: Gemini analyzes incoming complaint text and images to automatically determine the correct **Department** (e.g., assigning a "broken pipe" to Water Supply).
--   **Severity Assessment**: The AI evaluates the urgency of a report on a scale of 1-10, flagging high-risk issues (like "live wire detected") for immediate attention.
--   **Smart Summarization**: Converts lengthy, unstructured citizen complaints into concise, one-line summaries for quick dispatcher review.
+*   **Citizen Side:**
+    *   **Validity Check:** Filters out spam or vague complaints (e.g., "fix road" -> "Please specify location").
+    *   **Sentiment & Severity:** Analyzes text/images to estimate urgency before it even reaches a human.
+    *   **Smart Summarizer:** Compresses long descriptions into concise headers.
+
+*   **Admin Side:**
+    *   **Intelligent Triage:** Auto-categorizes incoming reports to the correct department.
+    *   **Workforce Dispatch:** Suggests optimal team allocation based on skill and proximity.
+
+### 🔥 Firebase Ecosystem
+*   **Authentication:** Secure Identity Platform for Citizens (Email/Phone) and Officials (RBAC).
+*   **Firestore (NoSQL):** Real-time database syncing data between the Citizen App and Admin Dashboard instantaneously.
 
 ---
 
 ## 🛠️ Complete Technology Stack
 
-| Feature | Tech Choices |
-|:---|:---|
-| **Frontend** | `Next.js 16 (App Router)` • `React 19` • `TailwindCSS 4` • `Lucide Icons` |
-| **State** | `React Context API` • `Hooks` |
-| **Backend** | `Firebase Firestore` (NoSQL) • `Firebase Authentication` • `Firebase Admin SDK` |
-| **Maps** | `Leaflet.js` • `OpenStreetMap` |
-| **AI Engine** | `Google Gemini Pro` (@google/generative-ai) |
-
-## 📋 Architecture
-
-The system uses a direct **Command-to-Execution** pipeline, removing legacy intermediaries for efficiency.
-
-```mermaid
-graph LR
-    A[Super Admin / Dept HQ] -->|Dispatches Ticket (Firestore)| B[Field Team]
-    B -->|Updates Status (Real-time)| A
-    C[Citizen] -->|Reports Issue| D[Gemini AI Processor]
-    D -->|Categorizes & Assigns| A
-```
-
-## 🔧 Installation & Setup
-
-1.  **Clone the Repository**
-    ```bash
-    git clone -b aeztrix https://github.com/SHIN-1O1/Civic-intel-OS.git
-    cd Civic-intel-OS
-    ```
-
-2.  **Install Dependencies**
-    ```bash
-    npm install
-    ```
-
-3.  **Environment Configuration**
-    Create a `.env.local` file with your **Firebase** and **Gemini** credentials:
-    ```env
-    # Firebase Client SDK
-    NEXT_PUBLIC_FIREBASE_API_KEY=your_key
-    NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=your_domain
-    NEXT_PUBLIC_FIREBASE_PROJECT_ID=your_id
-    NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=your_bucket
-    NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=your_sender_id
-    NEXT_PUBLIC_FIREBASE_APP_ID=your_app_id
-
-    # Firebase Admin SDK (Server-Side)
-    FIREBASE_PROJECT_ID=your_project_id
-    FIREBASE_CLIENT_EMAIL=your_client_email
-    FIREBASE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\n..."
-
-    # Google AI
-    GEMINI_API_KEY=your_gemini_key
-    ```
-
-4.  **Launch**
-    ```bash
-    npm run dev
-    ```
+| Feature | Citizen Portal (Frontend) | Admin Dashboard (Intel OS) | Backend & Infrastructure |
+|:---|:---|:---|:---|
+| **Framework** | Vanilla JS / HTML5 | Next.js 16 (App Router) | Firebase Admin SDK |
+| **Styling** | Custom CSS3 | Tailwind CSS 4 | - |
+| **Maps** | Leaflet.js / OSM | Leaflet React | Google Maps Platform (Optional) |
+| **AI Engine** | Gemini 2.5 Flash-Lite | Gemini 1.5 Pro | Vertex AI |
+| **Database** | Firebase Firestore | Firebase Firestore | Firestore Triggers |
 
 ---
 
-<div align="center">
-  <p>Built for the next generation of smart cities.</p>
-</div>
+## 📋 Architecture
+
+```mermaid
+graph LR
+    User[Citizen] -->|Files Complaint via Chat| Client[Utterance/Image]
+    Client -->|Verifies Validity| Gemini[Gemini AI]
+    Gemini -->|Returns Summary & Severity| Client
+    Client -->|Saves Ticket| DB[(Firebase Firestore)]
+    
+    DB -->|Real-time Sync| Admin[Admin Dashboard]
+    Admin -->|Auto-Assigns| Team[Field Team]
+    Team -->|Updates Status| DB
+    DB -->|Push Notification| User
