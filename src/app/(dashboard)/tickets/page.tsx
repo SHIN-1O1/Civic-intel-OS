@@ -20,6 +20,7 @@ export default function TicketsPage() {
     const [selectedTickets, setSelectedTickets] = React.useState<string[]>([]);
     const [showFilters, setShowFilters] = React.useState(true);
     const [loading, setLoading] = React.useState(true);
+    const [filters, setFilters] = React.useState<Record<string, string>>({});
 
     React.useEffect(() => {
         loadTickets();
@@ -36,6 +37,57 @@ export default function TicketsPage() {
         }
     };
 
+    // Filter tickets based on active filters
+    const filteredTickets = React.useMemo(() => {
+        if (Object.keys(filters).length === 0) return tickets;
+
+        return tickets.filter(ticket => {
+            // Ward filter
+            if (filters.ward && filters.ward !== 'all-wards') {
+                const wardMatch = ticket.location?.ward?.toLowerCase().replace(/\s/g, '-');
+                if (wardMatch !== filters.ward) return false;
+            }
+
+            // Department filter
+            if (filters.department && filters.department !== 'all-departments') {
+                const deptMatch = ticket.assignedDepartment?.toLowerCase().replace(/_/g, '-');
+                if (!deptMatch?.includes(filters.department.replace('&-', ''))) return false;
+            }
+
+            // Status filter
+            if (filters.status && filters.status !== 'all-status') {
+                const statusMatch = ticket.status?.toLowerCase().replace(/_/g, '-');
+                if (statusMatch !== filters.status) return false;
+            }
+
+            // SLA Stage filter
+            if (filters.slaStage && filters.slaStage !== 'all-sla') {
+                const slaMatch = ticket.slaStage?.toLowerCase().replace(/_/g, '-');
+                if (slaMatch !== filters.slaStage) return false;
+            }
+
+            // Date range filter
+            if (filters.dateFrom) {
+                const ticketDate = new Date(ticket.createdAt);
+                const fromDate = new Date(filters.dateFrom);
+                if (ticketDate < fromDate) return false;
+            }
+            if (filters.dateTo) {
+                const ticketDate = new Date(ticket.createdAt);
+                const toDate = new Date(filters.dateTo);
+                toDate.setHours(23, 59, 59, 999); // End of day
+                if (ticketDate > toDate) return false;
+            }
+
+            return true;
+        });
+    }, [tickets, filters]);
+
+    const handleFilterChange = (newFilters: Record<string, string>) => {
+        setFilters(newFilters);
+        toast.success(`Filters applied - showing ${Object.keys(newFilters).filter(k => newFilters[k]).length > 0 ? 'filtered' : 'all'} tickets`);
+    };
+
     const handleSelectTicket = (ticketId: string) => {
         setSelectedTickets((prev) =>
             prev.includes(ticketId)
@@ -45,10 +97,10 @@ export default function TicketsPage() {
     };
 
     const handleSelectAll = () => {
-        if (selectedTickets.length === tickets.length) {
+        if (selectedTickets.length === filteredTickets.length) {
             setSelectedTickets([]);
         } else {
-            setSelectedTickets(tickets.map((t) => t.id));
+            setSelectedTickets(filteredTickets.map((t) => t.id));
         }
     };
 
@@ -114,7 +166,7 @@ export default function TicketsPage() {
                     <Button variant="outline" size="icon" onClick={loadTickets} disabled={loading}>
                         <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
                     </Button>
-                    <Button variant="outline" onClick={() => handleExportCSV(tickets)}>
+                    <Button variant="outline" onClick={() => handleExportCSV(filteredTickets)}>
                         <Download className="h-4 w-4 mr-2" />
                         Export CSV
                     </Button>
@@ -149,7 +201,7 @@ export default function TicketsPage() {
                         <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => handleExportCSV(tickets.filter(t => selectedTickets.includes(t.id)))}
+                            onClick={() => handleExportCSV(filteredTickets.filter(t => selectedTickets.includes(t.id)))}
                         >
                             <Download className="h-4 w-4 mr-2" />
                             Export Selected
@@ -166,7 +218,7 @@ export default function TicketsPage() {
             </div>
 
             {/* Filters */}
-            {showFilters && <TicketFilters />}
+            {showFilters && <TicketFilters onFilterChange={handleFilterChange} />}
 
             {/* Data Table */}
             {loading ? (
@@ -175,7 +227,7 @@ export default function TicketsPage() {
                 </div>
             ) : (
                 <TicketTable
-                    tickets={tickets}
+                    tickets={filteredTickets}
                     selectedTickets={selectedTickets}
                     onSelectTicket={handleSelectTicket}
                     onSelectAll={handleSelectAll}

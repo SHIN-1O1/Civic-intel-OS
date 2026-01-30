@@ -47,8 +47,13 @@ service cloud.firestore {
     // Portal Users Collection
     // ============================================
     match /portalUsers/{userId} {
-      // Users can read their own document, super admins can read all
-      allow read: if isAuthenticated() && (request.auth.uid == userId || isSuperAdmin());
+      // Users can always read their own document (needed for role checking)
+      // Super admins can read all portal users
+      allow read: if isAuthenticated() && (
+        request.auth.uid == userId || 
+        (exists(/databases/$(database)/documents/portalUsers/$(request.auth.uid)) &&
+         get(/databases/$(database)/documents/portalUsers/$(request.auth.uid)).data.role == 'super_admin')
+      );
       
       // Only super admin can create/update/delete portal users
       allow create, update, delete: if isSuperAdmin();

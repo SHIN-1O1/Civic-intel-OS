@@ -127,69 +127,93 @@ export class FirebaseService implements ApiService {
     // ============ Tickets ============
     async getTickets(): Promise<Ticket[]> {
         try {
-            // Fetch both tickets and citizen complaints
+            // Fetch tickets with ordering
             const ticketsQuery = query(collection(db, 'tickets'), orderBy('updatedAt', 'desc'));
-            const complaintsQuery = query(collection(db, 'complaints'), orderBy('timestamp', 'desc'));
-
-            const [ticketsSnapshot, complaintsSnapshot] = await Promise.all([
-                getDocs(ticketsQuery),
-                getDocs(complaintsQuery)
-            ]);
+            const ticketsSnapshot = await getDocs(ticketsQuery);
 
             // Convert tickets
             const tickets = ticketsSnapshot.docs.map(doc => {
                 const data = doc.data();
-                return this.convertTimestamps(data) as Ticket;
+                return this.convertTimestamps({ ...data, id: doc.id }) as Ticket;
             });
 
-            // Convert citizen complaints to tickets
-            const citizenTickets = complaintsSnapshot.docs.map((doc, index) => {
-                const data = doc.data();
-                const report: CitizenReport = {
-                    id: doc.id,
-                    userId: data.userId || '',
-                    category: data.category || 'General',
-                    description: data.description || '',
-                    summary: data.summary || '',
-                    location: data.location || '',
-                    severity: data.severity || 'Medium',
-                    status: data.status || 'Pending',
-                    timestamp: data.timestamp?.toDate() || new Date(),
-                    date: data.date || '',
-                    hasImage: data.hasImage || false,
-                    imageUrl: data.imageUrl,
-                    aiVerified: data.aiVerified || false
-                };
+            // Try to fetch complaints - try ordered first, fallback to unordered
+            let citizenTickets: Ticket[] = [];
+            try {
+                // First try with ordering (requires index)
+                const complaintsQuery = query(collection(db, 'complaints'), orderBy('timestamp', 'desc'));
+                const complaintsSnapshot = await getDocs(complaintsQuery);
 
-                // Generate ticket number based on total count
-                const ticketNumber = 1000 + tickets.length + index;
-                return convertReportToTicket(report, ticketNumber);
-            });
+                citizenTickets = complaintsSnapshot.docs.map((doc, index) => {
+                    const data = doc.data();
+                    const report: CitizenReport = {
+                        id: doc.id,
+                        userId: data.userId || '',
+                        category: data.category || 'General',
+                        description: data.description || '',
+                        summary: data.summary || '',
+                        location: data.location || '',
+                        severity: data.severity || 'Medium',
+                        status: data.status || 'Pending',
+                        timestamp: data.timestamp?.toDate() || new Date(),
+                        date: data.date || '',
+                        hasImage: data.hasImage || false,
+                        imageUrl: data.imageUrl,
+                        aiVerified: data.aiVerified || false
+                    };
+
+                    // Generate ticket number based on total count
+                    const ticketNumber = 1000 + tickets.length + index;
+                    return convertReportToTicket(report, ticketNumber);
+                });
+
+                console.log(`Fetched ${citizenTickets.length} complaints from Firebase`);
+            } catch (complaintsError: any) {
+                // If index error or permission error, try without ordering
+                const errorCode = complaintsError?.code;
+                const errorMessage = complaintsError?.message || '';
+
+                if (errorCode === 'failed-precondition' || errorMessage.includes('index')) {
+                    console.warn('Complaints index missing, fetching without order...');
+                    try {
+                        // Fetch without ordering
+                        const complaintsSnapUnordered = await getDocs(collection(db, 'complaints'));
+                        citizenTickets = complaintsSnapUnordered.docs.map((doc, index) => {
+                            const data = doc.data();
+                            const report: CitizenReport = {
+                                id: doc.id,
+                                userId: data.userId || '',
+                                category: data.category || 'General',
+                                description: data.description || '',
+                                summary: data.summary || '',
+                                location: data.location || '',
+                                severity: data.severity || 'Medium',
+                                status: data.status || 'Pending',
+                                timestamp: data.timestamp?.toDate() || new Date(),
+                                date: data.date || '',
+                                hasImage: data.hasImage || false,
+                                imageUrl: data.imageUrl,
+                                aiVerified: data.aiVerified || false
+                            };
+                            const ticketNumber = 1000 + tickets.length + index;
+                            return convertReportToTicket(report, ticketNumber);
+                        });
+                        console.log(`Fetched ${citizenTickets.length} complaints (unordered)`);
+                    } catch (unorderedError) {
+                        console.warn('Could not fetch complaints:', unorderedError);
+                    }
+                } else if (errorCode !== 'permission-denied' && errorCode !== 'not-found') {
+                    console.warn('Error fetching complaints:', complaintsError);
+                }
+            }
 
             // Merge and sort by creation date
             return [...tickets, ...citizenTickets].sort((a, b) =>
                 b.createdAt.getTime() - a.createdAt.getTime()
             );
         } catch (error) {
-            // Check if this is a permission error or missing collection
-            const errorCode = (error as any)?.code;
-            const isExpectedError = errorCode === 'permission-denied' ||
-                errorCode === 'not-found' ||
-                (error as any)?.message?.includes('does not exist');
-
-            if (!isExpectedError) {
-                console.error('Unexpected error fetching tickets:', error);
-                throw error; // Re-throw unexpected errors
-            }
-
-            console.warn('Complaints collection not accessible, falling back to tickets only');
-            // Fallback to just tickets if complaints collection doesn't exist
-            const q = query(collection(db, 'tickets'), orderBy('updatedAt', 'desc'));
-            const snapshot = await getDocs(q);
-            return snapshot.docs.map(doc => {
-                const data = doc.data();
-                return this.convertTimestamps(data) as Ticket;
-            });
+            console.error('Error fetching tickets:', error);
+            throw error;
         }
     }
 
@@ -728,22 +752,64 @@ export class FirebaseService implements ApiService {
         department: Department,
         callback: (tickets: Ticket[]) => void
     ): Unsubscribe {
-        const q = query(
+        const ticketsQuery = query(
             collection(db, 'tickets'),
             where('assignedDepartment', '==', department),
             orderBy('createdAt', 'desc')
         );
 
-        return onSnapshot(q, (snapshot) => {
-            const tickets = snapshot.docs.map(doc => {
+        // Also query complaints that are assigned to this department
+        // Note: We don't use orderBy('timestamp', 'desc') here to avoid needing a composite index
+        // The results are sorted in memory in mergeAndCallback anyway
+        const complaintsQuery = query(
+            collection(db, 'complaints'),
+            where('assignedDepartment', '==', department)
+        );
+
+        let ticketsFromCollection: Ticket[] = [];
+        let complaintsAsTickets: Ticket[] = [];
+        let complaintsErrorLogged = false;
+
+        const mergeAndCallback = () => {
+            // Sort combined results by creation date
+            const allTickets = [...ticketsFromCollection, ...complaintsAsTickets].sort((a, b) =>
+                b.createdAt.getTime() - a.createdAt.getTime()
+            );
+            callback(allTickets);
+        };
+
+        const unsubTickets = onSnapshot(ticketsQuery, (snapshot) => {
+            ticketsFromCollection = snapshot.docs.map(doc => {
                 const data = doc.data();
                 return this.convertTimestamps({
                     ...data,
                     id: doc.id
                 }) as Ticket;
             });
-            callback(tickets);
+            mergeAndCallback();
         });
+
+        // Subscribe to complaints with error handling
+        const unsubComplaints = onSnapshot(complaintsQuery, (snapshot) => {
+            complaintsAsTickets = snapshot.docs.map(doc => {
+                const report = doc.data() as CitizenReport & { assignedTeam?: string; assignedTeamId?: string; assignedDepartment?: Department };
+                return this.convertReportToTicketSimple(doc.id, report);
+            });
+            mergeAndCallback();
+        }, (error) => {
+            // Only log once to avoid console spam
+            if (!complaintsErrorLogged) {
+                console.warn('Error subscribing to department complaints:', error);
+                complaintsErrorLogged = true;
+            }
+            complaintsAsTickets = [];
+            mergeAndCallback();
+        });
+
+        return () => {
+            unsubTickets();
+            unsubComplaints();
+        };
     }
 
     subscribeToTeamsByDepartment(
@@ -798,11 +864,19 @@ export class FirebaseService implements ApiService {
     }
 
     // Simplified version for real-time subscriptions (different from module-level convertReportToTicket)
-    private convertReportToTicketSimple(id: string, report: CitizenReport): Ticket {
+    private convertReportToTicketSimple(id: string, report: CitizenReport & { assignedTeam?: string; assignedTeamId?: string; assignedDepartment?: Department }): Ticket {
         const location = parseLocation(report.location);
         const timestamp = typeof report.timestamp === 'object' && 'toDate' in report.timestamp
             ? (report.timestamp as any).toDate()
             : new Date(report.timestamp);
+
+        // Map citizen report status to ticket status, accounting for assigned state
+        const statusMap: Record<string, TicketStatus> = {
+            'Pending': report.assignedTeam ? 'assigned' : 'open',
+            'In Progress': 'in_progress',
+            'Resolved': 'resolved'
+        };
+        const status: TicketStatus = statusMap[report.status] || (report.assignedTeam ? 'assigned' : 'open');
 
         return {
             id,
@@ -811,7 +885,7 @@ export class FirebaseService implements ApiService {
             type: report.category,
             category: report.category,
             description: report.description,
-            status: 'open',
+            status,
             priority: 'medium',
             priorityScore: 50,
             location,
@@ -821,6 +895,10 @@ export class FirebaseService implements ApiService {
             createdAt: timestamp,
             updatedAt: timestamp,
             citizenName: report.userId,
+            // Include assignment fields from the complaint document
+            assignedTeam: report.assignedTeam,
+            assignedTeamId: report.assignedTeamId,
+            assignedDepartment: report.assignedDepartment,
             activityLog: [],
             internalNotes: []
         };

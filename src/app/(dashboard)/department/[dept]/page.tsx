@@ -23,6 +23,7 @@ import { useAuth } from "@/contexts/auth-context";
 import { Department, DEPARTMENT_LABELS, Ticket as TicketType, Team } from "@/lib/types";
 import { FirebaseService } from "@/services/firebase-service";
 import { format } from "date-fns";
+import { toast } from "sonner";
 
 const firebaseService = new FirebaseService();
 
@@ -91,6 +92,16 @@ export default function DepartmentDashboard() {
 
     const handleViewTicket = (ticketId: string) => {
         router.push(`/tickets/${ticketId}`);
+    };
+
+    const handleMarkComplete = async (ticketId: string) => {
+        try {
+            await firebaseService.updateTicket(ticketId, { status: 'resolved' });
+            toast.success('Ticket marked as complete!');
+        } catch (error) {
+            console.error('Failed to mark complete:', error);
+            toast.error('Failed to mark ticket as complete');
+        }
     };
 
     if (!isValidDepartment) {
@@ -276,14 +287,26 @@ export default function DepartmentDashboard() {
                                                     </span>
                                                 </div>
                                             </div>
-                                            <Button
-                                                variant="ghost"
-                                                size="sm"
-                                                onClick={() => handleViewTicket(ticket.id)}
-                                            >
-                                                <Eye className="h-4 w-4 mr-1" />
-                                                View
-                                            </Button>
+                                            <div className="flex items-center gap-2">
+                                                <Button
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    onClick={() => handleViewTicket(ticket.id)}
+                                                >
+                                                    <Eye className="h-4 w-4 mr-1" />
+                                                    View
+                                                </Button>
+                                                <Button
+                                                    variant={ticket.status === 'resolved' ? 'outline' : 'default'}
+                                                    size="sm"
+                                                    onClick={() => handleMarkComplete(ticket.id)}
+                                                    disabled={ticket.status === 'resolved'}
+                                                    className={ticket.status === 'resolved' ? '' : 'bg-[var(--emerald-success)] hover:bg-[var(--emerald-success)]/90'}
+                                                >
+                                                    <CheckCircle2 className="h-4 w-4 mr-1" />
+                                                    {ticket.status === 'resolved' ? 'Completed' : 'Mark Complete'}
+                                                </Button>
+                                            </div>
                                         </div>
                                     ))}
                                 </div>

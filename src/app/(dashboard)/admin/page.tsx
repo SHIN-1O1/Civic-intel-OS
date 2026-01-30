@@ -45,8 +45,10 @@ import { toast } from "sonner";
 import { AddTeamModal } from "@/components/admin/add-team-modal";
 import { AddPortalUserModal } from "@/components/admin/add-portal-user-modal";
 import { EditTeamModal } from "@/components/admin/edit-team-modal";
+import { useAuth } from "@/contexts/auth-context";
 
 export default function AdminPage() {
+    const { user } = useAuth();
     const [teams, setTeams] = React.useState<Team[]>([]);
     const [portalUsers, setPortalUsers] = React.useState<PortalUser[]>([]);
     const [loading, setLoading] = React.useState(true);
@@ -68,9 +70,20 @@ export default function AdminPage() {
             return;
         }
 
+        if (!user) {
+            toast.error("You must be logged in to perform this action");
+            return;
+        }
+
         setClearingData(true);
         try {
-            const response = await fetch('/api/admin/clear-data', { method: 'DELETE' });
+            const token = await user.getIdToken();
+            const response = await fetch('/api/admin/clear-data', {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
             const data = await response.json();
 
             if (response.ok) {
@@ -123,15 +136,30 @@ export default function AdminPage() {
     const handleDeletePortalUser = async (userId: string) => {
         if (!confirm("Are you sure you want to delete this portal user? This will also delete their Firebase Auth account.")) return;
 
+        if (!user) {
+            toast.error("You must be logged in to perform this action");
+            return;
+        }
+
         try {
             setDeletingId(userId);
-            const response = await fetch(`/api/portal-users?id=${userId}`, { method: 'DELETE' });
-            if (!response.ok) throw new Error('Failed to delete');
+            const token = await user.getIdToken();
+            const response = await fetch(`/api/portal-users?id=${userId}`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
+            if (!response.ok) {
+                const data = await response.json().catch(() => ({ error: response.statusText }));
+                throw new Error(data.error || `Failed to delete (Status: ${response.status})`);
+            }
             toast.success("Portal user deleted successfully");
             loadData();
-        } catch (error) {
-            console.error(error);
-            toast.error("Failed to delete portal user");
+        } catch (error: any) {
+            console.error("Delete failed:", error);
+            toast.error(error.message || "Failed to delete portal user");
         } finally {
             setDeletingId(null);
         }

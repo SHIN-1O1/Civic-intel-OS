@@ -76,6 +76,23 @@ export function TicketFilters({ onFilterChange }: TicketFiltersProps) {
         setSlaStage("");
         setDateFrom("");
         setDateTo("");
+        // Also trigger filter change with empty values
+        if (onFilterChange) {
+            onFilterChange({});
+        }
+    };
+
+    const handleApplyFilters = () => {
+        if (onFilterChange) {
+            onFilterChange({
+                ward: ward || '',
+                department: department || '',
+                status: status || '',
+                slaStage: slaStage || '',
+                dateFrom: dateFrom || '',
+                dateTo: dateTo || '',
+            });
+        }
     };
 
     return (
@@ -167,7 +184,7 @@ export function TicketFilters({ onFilterChange }: TicketFiltersProps) {
                 <Button variant="ghost" onClick={handleReset}>
                     Reset
                 </Button>
-                <Button variant="default">
+                <Button variant="default" onClick={handleApplyFilters}>
                     Apply Filters
                 </Button>
             </div>
