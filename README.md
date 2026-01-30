@@ -5,14 +5,13 @@
   <p>
     <img src="https://img.shields.io/badge/Next.js-16.1-black?style=for-the-badge&logo=next.js" alt="Next.js" />
     <img src="https://img.shields.io/badge/Firebase-Auth%20%26%20Firestore-flame?style=for-the-badge&logo=firebase" alt="Firebase" />
+    <img src="https://img.shields.io/badge/Google_Gemini-Pro-4285F4?style=for-the-badge&logo=google-bard" alt="Gemini AI" />
     <img src="https://img.shields.io/badge/Tailwind_CSS-4.0-38B2AC?style=for-the-badge&logo=tailwind-css" alt="Tailwind CSS" />
-    <img src="https://img.shields.io/badge/Google_Gemini-AI-4285F4?style=for-the-badge&logo=google-bard" alt="Gemini AI" />
   </p>
 
   <p>
     <strong>Civic-intel-OS</strong> is a government-grade administrative dashboard designed to streamline city operations. 
-    <br />
-    It powers real-time automated assessment, intelligent workforce dispatching, and multi-departmental coordination.
+    It leverages the power of the <strong>Google Cloud Ecosystem</strong> to deliver real-time automated assessment, intelligent workforce dispatching, and secure multi-departmental coordination.
   </p>
 </div>
 
@@ -41,23 +40,36 @@
   </tr>
 </table>
 
-<div align="center">
-  <h3>🤖 AI Integration</h3>
-  <p>Powered by <strong>Google Gemini Pro</strong></p>
-  <p>
-    <em>Automatic categorization • Severity evaluation • Concise issue summarization</em>
-  </p>
-</div>
+## ⚡ Powered by Google Cloud & AI
 
-## 🛠️ Technology Stack
+This platform is built on a robust foundation of Google technologies to ensure scalability, security, and intelligence.
+
+### 🔥 Firebase Ecosystem
+The backbone of our secure, real-time infrastructure.
+
+| Service | Usage & Implementation |
+|:---|:---|
+| **Firebase Authentication** | **Identity Platform**: Handles secure login for Admins, HQs, and Field Teams. <br> **Custom Claims**: Usage of custom claims to strictly enforce our RBAC (Role-Based Access Control) system, distinguishing between `super_admin` and `department_hq`. |
+| **Cloud Firestore** | **NoSQL Database**: Stores tickets, user profiles, and audit logs with millisecond latency. <br> **Real-time Listeners**: Powers the "Live Dispatch Map" and dashboard counters, pushing updates instantly to all connected clients without page reloads. <br> **Security Rules**: Complex `firestore.rules` ensure that Department HQs only access data relevant to their specific jurisdiction. |
+
+### 🤖 Google Gemini AI Integration
+We utilize **Gemini Pro** via the Generative AI SDK to transform raw citizen reports into actionable data.
+
+-   **Intelligent Triage**: Gemini analyzes incoming complaint text and images to automatically determine the correct **Department** (e.g., assigning a "broken pipe" to Water Supply).
+-   **Severity Assessment**: The AI evaluates the urgency of a report on a scale of 1-10, flagging high-risk issues (like "live wire detected") for immediate attention.
+-   **Smart Summarization**: Converts lengthy, unstructured citizen complaints into concise, one-line summaries for quick dispatcher review.
+
+---
+
+## 🛠️ Complete Technology Stack
 
 | Feature | Tech Choices |
 |:---|:---|
 | **Frontend** | `Next.js 16 (App Router)` • `React 19` • `TailwindCSS 4` • `Lucide Icons` |
 | **State** | `React Context API` • `Hooks` |
-| **Backend** | `Firebase Firestore` (NoSQL) • `Firebase Authentication` |
+| **Backend** | `Firebase Firestore` (NoSQL) • `Firebase Authentication` • `Firebase Admin SDK` |
 | **Maps** | `Leaflet.js` • `OpenStreetMap` |
-| **AI Engine** | `Google Gemini Pro` |
+| **AI Engine** | `Google Gemini Pro` (@google/generative-ai) |
 
 ## 📋 Architecture
 
@@ -65,9 +77,9 @@ The system uses a direct **Command-to-Execution** pipeline, removing legacy inte
 
 ```mermaid
 graph LR
-    A[Super Admin / Dept HQ] -->|Dispatches Ticket| B[Field Team]
-    B -->|Updates Status| A
-    C[Citizen] -->|Reports Issue| D[AI Processor]
+    A[Super Admin / Dept HQ] -->|Dispatches Ticket (Firestore)| B[Field Team]
+    B -->|Updates Status (Real-time)| A
+    C[Citizen] -->|Reports Issue| D[Gemini AI Processor]
     D -->|Categorizes & Assigns| A
 ```
 
@@ -85,12 +97,22 @@ graph LR
     ```
 
 3.  **Environment Configuration**
-    Create a `.env.local` file:
+    Create a `.env.local` file with your **Firebase** and **Gemini** credentials:
     ```env
+    # Firebase Client SDK
     NEXT_PUBLIC_FIREBASE_API_KEY=your_key
     NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=your_domain
     NEXT_PUBLIC_FIREBASE_PROJECT_ID=your_id
-    # ... (see PORTAL_SETUP.md for full list)
+    NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=your_bucket
+    NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=your_sender_id
+    NEXT_PUBLIC_FIREBASE_APP_ID=your_app_id
+
+    # Firebase Admin SDK (Server-Side)
+    FIREBASE_PROJECT_ID=your_project_id
+    FIREBASE_CLIENT_EMAIL=your_client_email
+    FIREBASE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\n..."
+
+    # Google AI
     GEMINI_API_KEY=your_gemini_key
     ```
 
