@@ -44,7 +44,7 @@
 
 This platform is built on a robust foundation of Google technologies to ensure scalability, security, and intelligence.
 
-### 🔥 Firebase Ecosystem
+###  Firebase Ecosystem
 The backbone of our secure, real-time infrastructure.
 
 | Service | Usage & Implementation |
