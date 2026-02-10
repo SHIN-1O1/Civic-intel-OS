@@ -19,7 +19,7 @@ const nextConfig: NextConfig = {
               "img-src 'self' data: blob: https://*.googleapis.com https://*.gstatic.com https://*.firebasestorage.app https://*.tile.openstreetmap.org",
               "font-src 'self' https://fonts.gstatic.com",
               // Allow connections to Firebase and other required services
-              "connect-src 'self' https://*.googleapis.com https://*.firebaseio.com wss://*.firebaseio.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://*.tile.openstreetmap.org https://firestore.googleapis.com",
+              "connect-src 'self' https://*.googleapis.com https://*.firebaseio.com wss://*.firebaseio.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://*.tile.openstreetmap.org https://firestore.googleapis.com https://nominatim.openstreetmap.org",
               // Prevent framing (clickjacking protection)
               "frame-ancestors 'none'",
               "form-action 'self'",

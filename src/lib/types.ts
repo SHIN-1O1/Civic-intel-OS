@@ -4,7 +4,7 @@ export type TicketStatus = 'open' | 'assigned' | 'in_progress' | 'on_site' | 're
 export type TicketPriority = 'low' | 'medium' | 'high' | 'critical';
 export type SLAStage = 'on_track' | 'at_risk' | 'breached';
 export type TeamStatus = 'available' | 'busy' | 'offline';
-export type UserRole = 'super_admin' | 'department_hq';
+export type UserRole = 'super_admin' | 'department_hq' | 'ward_officer' | 'dispatcher' | 'field_team';
 
 // Department Portal System
 export type Department =
@@ -186,8 +186,8 @@ export interface KPIData {
     };
     avgResponseTime: number; // in minutes
     avgResponseTrend: number; // +/- from yesterday
-    avgResolutionTime?: number; // in hours
-    slaComplianceRate?: number; // percentage
+    avgResolutionTime: number; // in hours
+    slaComplianceRate: number; // percentage
 }
 
 export interface WardStats {
@@ -222,4 +222,83 @@ export interface CitizenReport {
     hasImage: boolean;
     imageUrl?: string;
     aiVerified: boolean;
+}
+
+// ============ IoT Types ============
+export type SensorType = 'water_level' | 'air_quality' | 'noise' | 'temperature' | 'vibration' | 'traffic_flow';
+export type SensorStatus = 'online' | 'warning' | 'critical' | 'offline';
+
+export interface IoTSensor {
+    id: string;
+    name: string;
+    type: SensorType;
+    location: {
+        lat: number;
+        lng: number;
+        address: string;
+    };
+    status: SensorStatus;
+    lastReading: number;
+    lastReadingAt: Date;
+    thresholds: {
+        warning: number;
+        critical: number;
+    };
+    unit: string;
+    department: Department;
+}
+
+export interface IoTReading {
+    id: string;
+    sensorId: string;
+    value: number;
+    timestamp: Date;
+    isAnomaly: boolean;
+}
+
+// ============ Predictive Maintenance Types ============
+export type RiskLevel = 'low' | 'medium' | 'high' | 'critical';
+
+export interface PredictiveAlert {
+    id: string;
+    location: {
+        ward: string;
+        address: string;
+        lat: number;
+        lng: number;
+    };
+    category: string;
+    department: Department;
+    riskScore: number; // 0-100
+    riskLevel: RiskLevel;
+    predictedDate: Date;
+    recurrenceCount: number; // number of past incidents
+    recommendation: string;
+    lastIncidentDate: Date;
+    createdAt: Date;
+}
+
+// ============ Field App Types ============
+export type FieldTaskStatus = 'assigned' | 'en_route' | 'on_site' | 'completed';
+
+export interface FieldTask {
+    id: string;
+    ticketId: string;
+    ticketNumber: number;
+    type: string;
+    category: string;
+    description: string;
+    status: FieldTaskStatus;
+    priority: TicketPriority;
+    location: {
+        ward: string;
+        address: string;
+        lat: number;
+        lng: number;
+    };
+    slaDeadline: Date;
+    assignedAt: Date;
+    teamName: string;
+    completionPhoto?: string;
+    completionNotes?: string;
 }

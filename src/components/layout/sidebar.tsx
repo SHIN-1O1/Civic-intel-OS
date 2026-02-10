@@ -19,6 +19,9 @@ import {
     Shield,
     LogOut,
     Building2,
+    Brain,
+    Radio,
+    Navigation,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -62,6 +65,21 @@ const superAdminNavItems: NavItem[] = [
         title: "Analytics",
         href: "/analytics",
         icon: <BarChart3 className="h-5 w-5" />,
+    },
+    {
+        title: "Predictive",
+        href: "/predictive",
+        icon: <Brain className="h-5 w-5" />,
+    },
+    {
+        title: "IoT Monitor",
+        href: "/iot",
+        icon: <Radio className="h-5 w-5" />,
+    },
+    {
+        title: "Field Ops",
+        href: "/field",
+        icon: <Navigation className="h-5 w-5" />,
     },
 ];
 
@@ -111,6 +129,21 @@ export function Sidebar() {
                     title: "Teams",
                     href: `/department/${currentDepartment}/teams`,
                     icon: <Users className="h-5 w-5" />,
+                },
+                {
+                    title: "Predictive",
+                    href: "/predictive",
+                    icon: <Brain className="h-5 w-5" />,
+                },
+                {
+                    title: "IoT Monitor",
+                    href: "/iot",
+                    icon: <Radio className="h-5 w-5" />,
+                },
+                {
+                    title: "Field Ops",
+                    href: "/field",
+                    icon: <Navigation className="h-5 w-5" />,
                 },
             ];
         }

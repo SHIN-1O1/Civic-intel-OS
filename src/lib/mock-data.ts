@@ -18,7 +18,9 @@ export const mockKPIData: KPIData = {
         total: 12
     },
     avgResponseTime: 42,
-    avgResponseTrend: -8
+    avgResponseTrend: -8,
+    avgResolutionTime: 18.5,
+    slaComplianceRate: 91.2
 };
 
 // Mock Tickets

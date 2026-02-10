@@ -33,31 +33,100 @@ import {
 } from '@/lib/types';
 import { geminiService } from './gemini-service';
 
-// Helper function to parse location string and extract ward
-function parseLocation(locationString: string): { ward: string; address: string; lat: number; lng: number } {
-    // Extract ward from location string format: "Area, Ward, District, City, State, PIN, Country"
-    const parts = locationString.split(',').map(p => p.trim());
+// Geocoding cache to avoid redundant API calls (Nominatim rate limit: 1 req/sec)
+const geocodeCache = new Map<string, { lat: number; lng: number }>();
+let lastGeocodeFetch = 0;
 
-    // Try to identify ward/district from the parts
-    let ward = 'Unknown Ward';
-    if (parts.length >= 3) {
-        // Typically ward is the 2nd or 3rd part
-        ward = parts[1] || parts[2] || 'Central';
+// Helper: geocode an address using OpenStreetMap Nominatim
+async function geocodeAddress(address: string): Promise<{ lat: number; lng: number }> {
+    const cacheKey = address.toLowerCase().trim();
+    const cached = geocodeCache.get(cacheKey);
+    if (cached) return cached;
+
+    // Rate limit: 1 request per second
+    const now = Date.now();
+    const timeSinceLast = now - lastGeocodeFetch;
+    if (timeSinceLast < 1100) {
+        await new Promise(resolve => setTimeout(resolve, 1100 - timeSinceLast));
     }
 
-    // TODO: Integrate geocoding service (Google Maps or OpenStreetMap Nominatim) to get actual coordinates
-    // For now, use default coordinates (can be enhanced with geocoding API later)
+    try {
+        lastGeocodeFetch = Date.now();
+        const encoded = encodeURIComponent(address);
+        const res = await fetch(
+            `https://nominatim.openstreetmap.org/search?q=${encoded}&format=json&limit=1`,
+            { headers: { 'User-Agent': 'CivicIntelOS/1.0 (civic-intelligence-platform)' } }
+        );
+
+        if (res.ok) {
+            const data = await res.json();
+            if (data && data.length > 0) {
+                const coords = { lat: parseFloat(data[0].lat), lng: parseFloat(data[0].lon) };
+                geocodeCache.set(cacheKey, coords);
+                return coords;
+            }
+        }
+    } catch (error) {
+        console.warn('[Geocoding] Nominatim lookup failed for:', address, error);
+    }
+
+    // Fallback: add small random offset around city center to avoid marker stacking
+    const fallback = {
+        lat: 28.6139 + (Math.random() - 0.5) * 0.05,
+        lng: 77.2090 + (Math.random() - 0.5) * 0.05
+    };
+    geocodeCache.set(cacheKey, fallback);
+    return fallback;
+}
+
+// Helper function to parse location string and extract ward
+async function parseLocationAsync(locationString: string): Promise<Ticket['location']> {
+    if (!locationString) {
+        return {
+            ward: 'Unknown Ward',
+            address: 'Unknown Address',
+            lat: 28.6139 + (Math.random() - 0.5) * 0.04,
+            lng: 77.2090 + (Math.random() - 0.5) * 0.04
+        };
+    }
+
+    const parts = locationString.split(',').map(p => p.trim());
+    let ward = 'Unknown Ward';
+    if (parts.length >= 3) {
+        ward = parts[1] || parts[2] || 'Central';
+    } else if (parts.length >= 1) {
+        ward = parts[0] || 'Central';
+    }
+
+    const coords = await geocodeAddress(locationString);
+    return { ward, address: locationString, lat: coords.lat, lng: coords.lng };
+}
+
+// Sync fallback for when async geocoding isn't available
+function parseLocationSync(locationString: string): Ticket['location'] {
+    if (!locationString) {
+        return { ward: 'Unknown Ward', address: 'Unknown Address', lat: 28.6139, lng: 77.2090 };
+    }
+    const parts = locationString.split(',').map(p => p.trim());
+    let ward = 'Unknown Ward';
+    if (parts.length >= 3) ward = parts[1] || parts[2] || 'Central';
     return {
         ward,
         address: locationString,
-        lat: 28.6139, // Default Delhi coordinates - FIXME: implement geocoding
-        lng: 77.2090
+        lat: 28.6139 + (Math.random() - 0.5) * 0.05,
+        lng: 77.2090 + (Math.random() - 0.5) * 0.05
     };
 }
 
 // Helper function to convert CitizenReport to Ticket
-function convertReportToTicket(report: CitizenReport, ticketNumber: number): Ticket {
-    const location = parseLocation(report.location);
+function convertReportToTicket(report: CitizenReport, ticketNumber: number, locationOverride?: Ticket['location']): Ticket {
+    // Use pre-parsed location if provided (async geocoding), otherwise use a sync fallback
+    const location = locationOverride || {
+        ward: report.location?.split(',')[1]?.trim() || 'Unknown Ward',
+        address: report.location || 'Unknown Address',
+        lat: 28.6139 + (Math.random() - 0.5) * 0.04,
+        lng: 77.2090 + (Math.random() - 0.5) * 0.04
+    };
 
     // Map severity to priority score
     const severityToScore: Record<string, number> = {
@@ -595,16 +664,49 @@ export class FirebaseService implements ApiService {
             ? Math.round((slaCompliantTickets.length / resolvedTickets.length) * 100 * 10) / 10
             : 0;
 
+        // Calculate trends from Firestore KPI snapshots
+        let criticalLoadTrend = 0;
+        let avgResponseTrend = 0;
+
+        try {
+            // Get last snapshot from ~1 hour ago
+            const oneHourAgo = new Date(now.getTime() - 60 * 60 * 1000);
+            const snapshotsQuery = query(
+                collection(db, 'kpi_snapshots'),
+                orderBy('timestamp', 'desc'),
+                limit(2)
+            );
+            const snapshots = await getDocs(snapshotsQuery);
+
+            if (!snapshots.empty) {
+                const lastSnapshot = snapshots.docs[0].data();
+                criticalLoadTrend = criticalLoad - (lastSnapshot.criticalLoad || 0);
+                avgResponseTrend = avgResponseTime - (lastSnapshot.avgResponseTime || 0);
+            }
+
+            // Store current snapshot for future trend calculation
+            await addDoc(collection(db, 'kpi_snapshots'), {
+                criticalLoad,
+                slaBreaches,
+                avgResponseTime,
+                avgResolutionTime,
+                slaComplianceRate,
+                timestamp: Timestamp.fromDate(now)
+            });
+        } catch (snapshotError) {
+            console.warn('[KPI] Could not calculate trends:', snapshotError);
+        }
+
         return {
             criticalLoad,
-            criticalLoadTrend: 0, // Could calculate from historical data
+            criticalLoadTrend,
             slaBreaches,
             activeWorkforce: {
                 online: onlineTeams,
                 total: teams.length
             },
             avgResponseTime,
-            avgResponseTrend: 0, // Could calculate from historical data
+            avgResponseTrend,
             avgResolutionTime,
             slaComplianceRate
         };
@@ -865,7 +967,7 @@ export class FirebaseService implements ApiService {
 
     // Simplified version for real-time subscriptions (different from module-level convertReportToTicket)
     private convertReportToTicketSimple(id: string, report: CitizenReport & { assignedTeam?: string; assignedTeamId?: string; assignedDepartment?: Department }): Ticket {
-        const location = parseLocation(report.location);
+        const location = parseLocationSync(report.location);
         const timestamp = typeof report.timestamp === 'object' && 'toDate' in report.timestamp
             ? (report.timestamp as any).toDate()
             : new Date(report.timestamp);

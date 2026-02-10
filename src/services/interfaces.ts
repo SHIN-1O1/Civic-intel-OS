@@ -1,4 +1,4 @@
-import { Ticket, Team, User, AuditLog, KPIData, WardStats, SystemFeedItem, PortalUser, SystemConfig } from '@/lib/types';
+import { Ticket, Team, User, AuditLog, KPIData, WardStats, SystemFeedItem, PortalUser, SystemConfig, IoTSensor, IoTReading, PredictiveAlert } from '@/lib/types';
 
 export interface ApiService {
     // Tickets
@@ -32,5 +32,12 @@ export interface ApiService {
 
     // AI
     assessTicket(ticket: Ticket): Promise<Ticket>;
+
+    // IoT
+    getIoTSensors?(): Promise<IoTSensor[]>;
+    getIoTReadings?(sensorId: string, hours?: number): Promise<IoTReading[]>;
+
+    // Predictive Maintenance
+    getPredictiveAlerts?(): Promise<PredictiveAlert[]>;
 }
 
