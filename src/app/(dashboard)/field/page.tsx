@@ -12,13 +12,12 @@ import {
     CheckCircle2,
     AlertTriangle,
     Truck,
-    Camera,
     ArrowRight
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { format, formatDistanceToNow } from "date-fns";
 import { api } from "@/services/api";
-import { Ticket, FieldTaskStatus, DEPARTMENT_LABELS, Department } from "@/lib/types";
+import { Ticket, TicketStatus, FieldTaskStatus, DEPARTMENT_LABELS, Department } from "@/lib/types";
 
 const statusFlow: FieldTaskStatus[] = ['assigned', 'en_route', 'on_site', 'completed'];
 
@@ -82,7 +81,7 @@ export default function FieldAppPage() {
                 completed: 'resolved'
             };
 
-            await api.updateTicket(ticketId, { status: ticketStatusMap[next] as any });
+            await api.updateTicket(ticketId, { status: ticketStatusMap[next] as TicketStatus });
             setTaskStatuses(prev => ({ ...prev, [ticketId]: next }));
         } catch (error) {
             console.error("Failed to update status:", error);
